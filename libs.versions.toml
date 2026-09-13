@@ -1,4 +1,7 @@
 [versions]
+# spotless and ktfmt are read by the Gradle build only, which formats but never compiles.
+spotless = "8.10.2"
+ktfmt = "0.64"
 logback = "1.6.2"
 androidx-lifecycle = "2.11.0"
 kotlinx-coroutines = "1.11.0"
@@ -18,3 +21,6 @@ cup-widgets-sourceCode = { module = "net.kodein.cup:cup-widgets-source-code", ve
 cup-plugin-speakerWindow = { module = "net.kodein.cup:cup-plugin-speaker-window", version.ref = "cup" }
 cup-plugin-laser = { module = "net.kodein.cup:cup-plugin-laser", version.ref = "cup" }
 cup-plugin-imageExport = { module = "net.kodein.cup:cup-plugin-image-export", version.ref = "cup" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

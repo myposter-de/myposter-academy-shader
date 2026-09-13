@@ -7,7 +7,9 @@ Target: JVM desktop only. No Android, no web.
 
 ## Build system
 
-This project uses the **Kotlin Toolchain (Amper)**, not Gradle.
+Amper builds. Gradle formats. The two never touch the same files.
+
+This project compiles with the **Kotlin Toolchain (Amper)**.
 
 - `./kotlin build` — compile everything
 - `./kotlin test` — run the tests
@@ -15,7 +17,22 @@ This project uses the **Kotlin Toolchain (Amper)**, not Gradle.
 - `./kotlin show settings -m shared` — print the effective, resolved settings
 
 Configuration lives in `project.yaml`, `libs.versions.toml` and the two
-`module.yaml` files. There is no `build.gradle.kts`.
+`module.yaml` files. No Gradle file declares a source set or a dependency.
+
+## Formatting
+
+Spotless runs ktfmt in the `kotlinlang` style, as in `myposter-app`.
+
+- `./gradlew spotlessApply` — format every Kotlin file
+- `./gradlew spotlessCheck` — fail if one is unformatted
+
+Spotless ships as a Gradle plugin only, so `build.gradle.kts` and
+`settings.gradle.kts` exist for it alone. Gradle writes to `build/gradle`,
+because Amper owns `build/`. Versions are in `libs.versions.toml`, which both
+tools read.
+
+Run `./gradlew spotlessApply` before every commit. ktfmt reflows whole files,
+so a late format makes a large, unrelated diff.
 
 ## Modules
 
