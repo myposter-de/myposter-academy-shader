@@ -26,10 +26,10 @@ import de.myposter.academy.shaders.slides.wannLohntEs
 import de.myposter.academy.shaders.slides.warumSchnell
 import de.myposter.academy.shaders.slides.wasIstEinShader
 import de.myposter.academy.shaders.theme.ShaderTalkTheme
+import de.myposter.academy.shaders.theme.slidePush
 import net.kodein.cup.Presentation
 import net.kodein.cup.SlideSpecs
 import net.kodein.cup.Slides
-import net.kodein.cup.TransitionSet
 import net.kodein.cup.imgexp.imageExport
 import net.kodein.cup.laser.laser
 import net.kodein.cup.speaker.speakerWindow
@@ -79,8 +79,8 @@ fun ShaderTalk() {
                 defaultSlideSpecs =
                     SlideSpecs(
                         size = SLIDE_SIZE,
-                        startTransitions = TransitionSet.fade,
-                        endTransitions = TransitionSet.fade,
+                        startTransitions = slidePush,
+                        endTransitions = slidePush,
                     )
             },
             backgroundColor = MaterialTheme.colorScheme.background,
