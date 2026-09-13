@@ -1,0 +1,14 @@
+# Build output
+build/
+.kotlin/
+.gradle/
+
+# CuP keeps the last slide, the window position and downloaded emoji here.
+.cup/
+
+# IDE
+.idea/
+*.iml
+
+# macOS
+.DS_Store

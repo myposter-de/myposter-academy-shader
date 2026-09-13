@@ -1,0 +1,18 @@
+product: jvm/app
+
+dependencies:
+  - //shared
+  - $compose.desktop.currentOs
+  - $compose.preview
+  - $libs.kotlinx.coroutines.swing
+  - $libs.logback.classic
+
+settings:
+  compose: enabled
+  jvm:
+    mainClass: de.myposter.academy.shaders.MainKt
+    # The CuP syntax highlighter runs highlight.js on GraalJS.
+    # GraalJS needs sun.misc.Unsafe.ensureClassInitialized, which JDK 25 removed.
+    release: 21
+    jdk:
+      version: 21
