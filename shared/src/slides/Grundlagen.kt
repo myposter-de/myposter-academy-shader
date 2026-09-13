@@ -69,8 +69,8 @@ val warumSchnell by Slide(
             Step(step >= 2) {
                 BigStat(
                     value = "300 Mio.",
-                    text = "Rechenoperationen — × 8 Filterschritte × 3 Kanäle. " +
-                        "Pro Slider-Bewegung. Und ein Slider erzeugt 60 davon pro Sekunde.",
+                    text = "Rechenoperationen: 12 Mio. Pixel × 8 Filterschritte × 3 Kanäle. " +
+                        "Pro Slider-Bewegung. Ein Slider erzeugt 60 davon pro Sekunde.",
                     valueColor = MaterialTheme.deck.cpu,
                 )
             }
@@ -95,15 +95,15 @@ val warumSchnell by Slide(
 
 @Composable
 private fun HardwareRow(label: String, text: String, color: Color) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth()) {
         Text(
             text = label,
-            modifier = Modifier.width(310.dp),
+            modifier = Modifier.width(310.dp).alignByBaseline(),
             style = MaterialTheme.typography.headlineMedium,
             color = color,
         )
         Spacer(Modifier.width(20.dp))
-        Body(text)
+        Body(text, Modifier.alignByBaseline())
     }
 }
 
@@ -133,7 +133,7 @@ val simt by Slide(
             Step(step >= 1, Modifier.weight(1f)) {
                 Column(Modifier.fillMaxHeight()) {
                     Body(
-                        "Die GPU führt Pixel in Gruppen aus — 32 oder 64, je nach Hersteller. " +
+                        "Die GPU führt Pixel in Gruppen aus, 32 oder 64 je nach Hersteller. " +
                             "Alle Threads einer Gruppe führen dieselbe Instruktion aus, " +
                             "auf verschiedenen Daten.",
                         color = MaterialTheme.colorScheme.onBackground,
@@ -161,7 +161,7 @@ val simt by Slide(
                     BranchRow("Zweig B", branchA.map { !it })
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = "Kosten: beide Zweige. Nutzen: einer.",
+                        text = "Die GPU zahlt für beide Zweige und nutzt einen.",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.deck.cpu,
                     )
@@ -171,11 +171,12 @@ val simt by Slide(
 
         Spacer(Modifier.height(14.dp))
         Step(step >= 3) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionLabel("Versprechen 1")
+            Row {
+                SectionLabel("Versprechen 1", modifier = Modifier.alignByBaseline())
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text = "Deshalb hat mein Shader kein einziges if im Pixelpfad.",
+                    modifier = Modifier.alignByBaseline(),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -293,8 +294,8 @@ val wasIstEinShader by Slide(
             }
             Step(step >= 2) {
                 Text(
-                    text = "Du schreibst nicht die Schleife. Du schreibst den " +
-                        "Schleifenkörper — wann und wie oft er läuft, entscheidet das System.",
+                    text = "Du schreibst den Schleifenkörper, nicht die Schleife. " +
+                        "Wann und wie oft er läuft, entscheidet das System.",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -440,8 +441,8 @@ val pipeline by Slide(
             Step(step >= 2) {
                 Text(
                     text = "Für Bildfilter ist die Geometrie immer dasselbe Rechteck. " +
-                        "Deshalb schreibst du bei AGSL und SkSL keinen Vertex-Shader — " +
-                        "der ist schon da.",
+                        "Deshalb schreibst du bei AGSL und SkSL keinen Vertex-Shader. " +
+                        "Der ist schon da.",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                 )

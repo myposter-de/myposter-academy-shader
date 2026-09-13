@@ -33,20 +33,38 @@ class RollingMedian(private val capacity: Int = 31) {
     fun clear() = samples.clear()
 }
 
-/** Holds the measured numbers of the hook demo. */
+/**
+ * Holds the measured numbers of the hook demo.
+ *
+ * We measure the CPU and we do not measure the GPU. Every clock on the drawing
+ * path is capped by the refresh rate: a filter that costs 2 ms and one that
+ * costs 12 ms both report 16.7 ms. That number is the monitor, not the filter.
+ *
+ * So the GPU side gets the frame budget instead, and the comparison becomes
+ * "one pass" against "one frame". Both numbers are then true.
+ */
 class DemoTimings {
     private val cpu = RollingMedian()
     private val frames = RollingMedian()
 
+    /** Duration of one full byte-loop pass over the whole image. */
     var cpuMedianMs: Double? by mutableStateOf(null)
         private set
-    var frameMedianMs: Double? by mutableStateOf(null)
+
+    /** The measured frame interval, so the budget of this machine's display. */
+    var frameBudgetMs: Double? by mutableStateOf(null)
         private set
+
     var cpuRuns: Int by mutableStateOf(0)
         private set
 
-    /** Drops the first samples, so a cold shader compile does not count. */
-    private var warmup = 3
+    /** How many frames one CPU pass costs. */
+    val cpuFrames: Double?
+        get() {
+            val pass = cpuMedianMs ?: return null
+            val budget = frameBudgetMs ?: return null
+            return pass / budget
+        }
 
     fun addCpu(ms: Double) {
         cpu.add(ms)
@@ -55,26 +73,16 @@ class DemoTimings {
     }
 
     fun addFrame(ms: Double) {
-        if (warmup > 0) {
-            warmup--
-            return
-        }
         frames.add(ms)
-        frameMedianMs = frames.median()
-    }
-
-    fun resetFrames() {
-        frames.clear()
-        warmup = 3
-        frameMedianMs = null
+        frameBudgetMs = frames.median()
     }
 }
 
 /**
  * Measures the interval between drawn frames while [active] is true.
  *
- * This is the honest GPU number: how long one full frame takes, filter
- * included, on this machine, at this image size.
+ * This is the frame budget, not the cost of the filter. vsync clamps it, which
+ * is exactly why we report it as a budget.
  */
 @Composable
 fun MeasureFrameTime(active: Boolean, onFrame: (Double) -> Unit) {
@@ -87,6 +95,13 @@ fun MeasureFrameTime(active: Boolean, onFrame: (Double) -> Unit) {
             last = now
         }
     }
+}
+
+/** Formats a frame count for the slide. */
+fun formatFrames(frames: Double?): String = when {
+    frames == null -> "—"
+    frames < 1.5 -> "1 Frame"
+    else -> "${frames.toInt()} Frames"
 }
 
 /** Formats a duration for the slide. */

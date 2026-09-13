@@ -29,6 +29,7 @@ import de.myposter.academy.shaders.shader.CpuAdjustedImage
 import de.myposter.academy.shaders.shader.ImageAdjust
 import de.myposter.academy.shaders.shader.MeasureFrameTime
 import de.myposter.academy.shaders.shader.ShaderAdjustedImage
+import de.myposter.academy.shaders.shader.formatFrames
 import de.myposter.academy.shaders.shader.formatMs
 import de.myposter.academy.shaders.shader.loadDemoImage
 import de.myposter.academy.shaders.theme.AccentRule
@@ -77,11 +78,14 @@ val hookDemo by PreparedSlide(
         Erst beim Zahlen-Step reden.
 
         Ehrlich bleiben:
-        - Median über N Läufe, nach Warmup
-        - feste Bildgröße nennen
+        - CPU: Median über N Durchläufe, nach Warmup, feste Bildgröße nennen
+        - GPU: wir messen sie nicht. vsync deckelt jede Messung auf der
+          Zeichenstrecke. Deshalb steht dort das Frame-Budget, nicht die
+          Filterzeit. Wenn jemand fragt: ja, der Shader ist noch schneller
+          als 16,7 ms — wir können es hier nur nicht zeigen.
 
         Steps:
-        0. CPU-Implementierung — ziehen, es ruckelt
+        0. CPU-Implementierung — ziehen, das Bild kriecht hinterher
         1. Shader — ziehen, es klebt am Finger
         2. Zahlen einblenden
         """
@@ -113,7 +117,7 @@ val hookDemo by PreparedSlide(
                 DemoColumn(
                     label = "CPU · Byte-Loop",
                     accent = MaterialTheme.deck.cpu,
-                    verdict = "Es ruckelt und hinkt hinterher.",
+                    verdict = "Der Slider läuft. Das Bild hinkt hinterher.",
                     brightness = brightness,
                     onBrightness = { brightness = it },
                     modifier = Modifier.weight(1f),
@@ -215,19 +219,33 @@ val hookZahlen by Slide(
     )
 ) { step ->
     SlideFrame(id = "03 · hookZahlen", timing = "3:00–3:40 · 2 Steps", title = "Die Messung") {
-        val cpu = TalkState.timings.cpuMedianMs
-        val gpu = TalkState.timings.frameMedianMs
-        val max = listOfNotNull(cpu, gpu).maxOrNull() ?: 1.0
+        val timings = TalkState.timings
+        val cpu = timings.cpuMedianMs
+        val budget = timings.frameBudgetMs
+        val max = listOfNotNull(cpu, budget).maxOrNull() ?: 1.0
 
         Caption(
             TalkState.demo?.let {
-                "${it.width} × ${it.height} px · Median aus ${TalkState.timings.cpuRuns} Läufen nach Warmup"
-            } ?: "Noch nicht gemessen — Slide 2 zuerst zeigen"
+                "${it.width} × ${it.height} px · CPU-Median aus ${timings.cpuRuns} Durchläufen " +
+                    "nach Warmup · GPU: das Frame-Budget, denn vsync deckelt jede Messung"
+            } ?: "Noch nicht gemessen. Zuerst Slide 2 zeigen"
         )
 
         Fill(spacedBy = 24.dp) {
-            TimingBar("CPU · Byte-Loop", cpu, max, MaterialTheme.deck.cpu)
-            TimingBar("GPU · Shader", gpu, max, MaterialTheme.deck.gpu)
+            TimingBar(
+                label = "CPU · Byte-Loop",
+                ms = cpu,
+                maxMs = max,
+                color = MaterialTheme.deck.cpu,
+                valueText = "${formatMs(cpu)} · ${formatFrames(timings.cpuFrames)}",
+            )
+            TimingBar(
+                label = "GPU · Shader",
+                ms = budget,
+                maxMs = max,
+                color = MaterialTheme.deck.gpu,
+                valueText = "< ${formatMs(budget)} · 1 Frame",
+            )
         }
 
         Step(step >= 1) {
@@ -251,7 +269,7 @@ val agenda by Slide(
             "03" to "Der echte Shader, Zeile für Zeile",
             "04" to "Wie man selbst hinkommt",
             "05" to "Dasselbe Prinzip, ganz anderes Feld",
-            "06" to "Wann es sich lohnt — und wann nicht",
+            "06" to "Wann es sich lohnt, und wann nicht",
         )
         Fill(spacedBy = 18.dp) {
             Row(
@@ -273,9 +291,10 @@ val agenda by Slide(
 
 @Composable
 private fun AgendaItem(number: String, label: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row {
         Text(
             text = number,
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.titleLarge,
             fontFamily = monoFamily,
             color = MaterialTheme.colorScheme.primary,
@@ -283,6 +302,7 @@ private fun AgendaItem(number: String, label: String) {
         Spacer(Modifier.width(14.dp))
         Text(
             text = label,
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
         )

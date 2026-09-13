@@ -7,7 +7,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RenderEffect
@@ -17,7 +19,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.skiaCanvas
 import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.Paint
@@ -72,12 +73,14 @@ fun ShaderAdjustedImage(
  * The CPU path. The filter runs over the pixel array, then the result becomes
  * a new bitmap.
  *
- * The work runs on one worker thread, serialized, so the UI stays alive and
- * the lag is the real lag.
+ * One worker runs one pass at a time and never drops a finished pass. While a
+ * pass runs, the slider keeps moving and the newer values pile up. The worker
+ * then skips to the newest one. So the image crawls behind the slider instead
+ * of freezing until the drag ends — that is the real lag, and the audience
+ * must see it.
  *
  * @param onTiming Reports the duration of one full pass, in milliseconds.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun CpuAdjustedImage(
     demo: DemoImage,
@@ -85,17 +88,22 @@ fun CpuAdjustedImage(
     modifier: Modifier = Modifier,
     onTiming: (Double) -> Unit = {},
 ) {
-    val worker = remember { Dispatchers.Default.limitedParallelism(1) }
-    val dst = remember(demo) { ByteArray(demo.rgba.size) }
     var result by remember(demo) { mutableStateOf(demo.toImageBitmap()) }
+    val requested = remember(demo) { mutableStateOf(adjust) }
+    requested.value = adjust
+    val report by rememberUpdatedState(onTiming)
 
-    LaunchedEffect(demo, adjust) {
-        val bitmap = withContext(worker) {
-            val nanos = measureNanoTime { cpuImageAdjust(demo.rgba, dst, adjust) }
-            onTiming(nanos / 1_000_000.0)
-            rgbaToImageBitmap(demo.width, demo.height, dst.copyOf())
+    LaunchedEffect(demo) {
+        val dst = ByteArray(demo.rgba.size)
+        // snapshotFlow conflates: a value that arrives during a pass waits, and
+        // every value before it is dropped. No cancellation, no discarded work.
+        snapshotFlow { requested.value }.collect { target ->
+            result = withContext(Dispatchers.Default) {
+                val nanos = measureNanoTime { cpuImageAdjust(demo.rgba, dst, target) }
+                report(nanos / 1_000_000.0)
+                rgbaToImageBitmap(demo.width, demo.height, dst.copyOf())
+            }
         }
-        result = bitmap
     }
 
     Image(

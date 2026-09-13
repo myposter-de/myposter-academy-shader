@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -54,7 +53,7 @@ val preis by Slide(
                 }
                 Step(step >= 2, Modifier.weight(1f)) {
                     CostCard(
-                        label = "Zwei Implementierungen, eine Wahrheit",
+                        label = "Doppelte Wartung",
                         labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         text = "Eine billigere Umformulierung eines Schritts ändert, was der " +
                             "Kunde gedruckt bekommt. Absicherung: Pixelvergleichs-Tests " +
@@ -131,16 +130,17 @@ val wannLohntEs by Slide(
 
 @Composable
 private fun Criterion(number: String, text: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth()) {
         Text(
             text = number,
-            modifier = Modifier.width(80.dp),
+            modifier = Modifier.width(80.dp).alignByBaseline(),
             style = MaterialTheme.typography.displayMedium.copy(fontFamily = monoFamily),
             color = MaterialTheme.deck.gpu,
         )
         Spacer(Modifier.width(24.dp))
         Text(
             text = text,
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -156,7 +156,7 @@ val takeaway by Slide(
         Text(
             text = "Wenn dieselbe simple Rechnung millionenfach auf unabhängigen Daten " +
                 "läuft und das Ergebnis sowieso auf den Bildschirm soll, ist die GPU " +
-                "nicht der exotische, sondern der naheliegende Ort.",
+                "der naheliegende Ort.",
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -170,7 +170,7 @@ val takeaway by Slide(
         Step(step >= 1) {
             Text(
                 text = "Und wenn das Ergebnis gar nicht auf den Bildschirm soll, heißt das " +
-                    "Werkzeug Compute statt Fragment — das Denkmuster bleibt dasselbe.",
+                    "Werkzeug Compute statt Fragment. Das Denkmuster bleibt dasselbe.",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.deck.teal,
             )
@@ -198,10 +198,11 @@ val fragen by Slide(
 
 @Composable
 private fun LinkLine(text: String, link: String) {
-    Row(verticalAlignment = Alignment.Bottom) {
-        Body(text, color = MaterialTheme.colorScheme.onBackground)
+    Row {
+        Body(text, Modifier.alignByBaseline(), color = MaterialTheme.colorScheme.onBackground)
         Text(
             text = link,
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.bodyLarge,
             fontFamily = monoFamily,
             color = MaterialTheme.colorScheme.outline,

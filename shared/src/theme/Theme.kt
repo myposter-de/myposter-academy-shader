@@ -27,10 +27,13 @@ fun DarkSection(content: @Composable () -> Unit) {
 
 @Composable
 private fun Themed(dark: Boolean, content: @Composable () -> Unit) {
+    // Draw nothing until Avenir Next is in. A frame of empty slide beats a frame
+    // in the platform fallback, which wraps wider and breaks every layout.
+    val family = rememberAvenirNext() ?: return
     val scheme = if (dark) darkScheme else lightScheme
     MaterialTheme(
         colorScheme = scheme,
-        typography = deckTypography(),
+        typography = deckTypography(family),
         shapes = Shapes(
             extraSmall = RoundedCornerShape(2.dp),
             small = RoundedCornerShape(4.dp),

@@ -8,12 +8,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
-import de.myposter.academy.shaders.resources.Res
-import de.myposter.academy.shaders.resources.avenir_next_bold_font
-import de.myposter.academy.shaders.resources.avenir_next_demi_font
-import de.myposter.academy.shaders.resources.avenir_next_heavy_italic_font
-import de.myposter.academy.shaders.resources.avenir_next_regular_font
-import org.jetbrains.compose.resources.Font
+
+/** No Roboto Mono is licensed for the desktop app, so the platform monospace stands in. */
+val monoFamily: FontFamily = FontFamily.Monospace
 
 /**
  * The sizes below are the storyboard values divided by two.
@@ -21,21 +18,9 @@ import org.jetbrains.compose.resources.Font
  * A CuP slide is 640 × 360 dp and the storyboard is 1920 × 1080 px, so the
  * deck runs at a 960 × 540 dp slide size. See `Presentation.kt`.
  */
-@Composable
-fun avenirNext(): FontFamily = FontFamily(
-    Font(Res.font.avenir_next_heavy_italic_font, FontWeight.Black, FontStyle.Italic),
-    Font(Res.font.avenir_next_bold_font, FontWeight.Bold),
-    Font(Res.font.avenir_next_demi_font, FontWeight.SemiBold),
-    Font(Res.font.avenir_next_regular_font, FontWeight.Normal),
-)
-
-/** No Roboto Mono is licensed for the desktop app, so the platform monospace stands in. */
-val monoFamily: FontFamily = FontFamily.Monospace
-
-@Composable
-fun deckTypography(): Typography {
+fun deckTypography(family: FontFamily): Typography {
     val base = TextStyle.Default.copy(
-        fontFamily = avenirNext(),
+        fontFamily = family,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
             trim = LineHeightStyle.Trim.None,

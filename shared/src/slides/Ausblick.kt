@@ -52,7 +52,8 @@ val leiter by Slide(
                 Rung(
                     "01",
                     "Deklarative Filter",
-                    "CSS filter, SVG-Primitives, ColorMatrixColorFilter — nutzen intern die GPU",
+                    "CSS filter, SVG-Primitives, ColorMatrixColorFilter, " +
+                        "alle nutzen intern die GPU",
                 )
             }
             Step(step >= 2) {
@@ -98,23 +99,22 @@ private fun Rung(
             .clip(RoundedCornerShape(MaterialTheme.deck.cornerM))
             .background(background)
             .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = number,
-            modifier = Modifier.width(40.dp),
+            modifier = Modifier.width(40.dp).alignByBaseline(),
             style = MaterialTheme.typography.titleLarge,
             fontFamily = monoFamily,
             color = numberColor,
         )
         Text(
             text = title,
-            modifier = Modifier.width(260.dp),
+            modifier = Modifier.width(260.dp).alignByBaseline(),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(Modifier.width(12.dp))
-        Caption(text, Modifier.weight(1f), color = textColor)
+        Caption(text, Modifier.weight(1f).alignByBaseline(), color = textColor)
     }
 }
 
@@ -153,7 +153,7 @@ val computeUndKi by Slide(
                             "Die Pipeline weglassen",
                             MaterialTheme.deck.teal,
                             "Ein Compute-Shader ist ein Shader ohne Rasterizer und ohne " +
-                                "Framebuffer. Übrig bleibt der Kern: eine Funktion für " +
+                                "Framebuffer. Übrig bleibt der Kern, eine Funktion für " +
                                 "hunderttausende unabhängige Datenpunkte.",
                         )
                     }
@@ -185,18 +185,17 @@ val computeUndKi by Slide(
                         ComputePoint(
                             "Rückbezug 1 · Bandbreite",
                             MaterialTheme.deck.amber,
-                            "Bei LLM-Inferenz ist der Engpass nicht die Rechenleistung, " +
-                                "sondern die Speicherbandbreite. Mein Filter ist auch nicht " +
-                                "rechenlimitiert, sondern limitiert durch Lesen und Schreiben " +
-                                "des Bildes.",
+                            "Bei LLM-Inferenz begrenzt die Speicherbandbreite, nicht die " +
+                                "Rechenleistung. Meinen Filter begrenzt ebenso das Lesen und " +
+                                "Schreiben des Bildes, nicht die Arithmetik.",
                         )
                     }
                     Step(step >= 5) {
                         ComputePoint(
                             "Rückbezug 2 · Präzision",
                             MaterialTheme.deck.amber,
-                            "Die Frage aus step8() — wie viele Bits brauche ich wirklich? — " +
-                                "heißt in der KI-Welt Quantisierung: fp32, fp16, int8, int4.",
+                            "Die Frage aus step8(), wie viele Bits es wirklich braucht, heißt " +
+                                "in der KI-Welt Quantisierung: fp32, fp16, int8, int4.",
                         )
                     }
                 }

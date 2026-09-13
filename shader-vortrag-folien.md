@@ -73,11 +73,18 @@ Die wichtigste Folie des Vortrags. Kein Text, nur Bild und Slider.
 
 - **Step 0:** Testbild + ein Helligkeits-Slider, verdrahtet gegen die
   **CPU-Implementierung** (der Byte-Loop, in einen Coroutine-Dispatcher gepackt,
-  damit die Präsentation nicht einfriert). Ziehen. Es ruckelt, es hinkt hinterher.
+  damit die Präsentation nicht einfriert). Ziehen. Der Slider läuft flüssig, das
+  Bild hinkt Sekunden hinterher.
 - **Step 1:** Derselbe Slider, verdrahtet gegen den **Shader**. Ziehen. Es klebt
   am Finger.
-- **Step 2:** Zahl einblenden — gemessene Zeit pro Frame, CPU vs. GPU, mit
-  Bildgröße dazu.
+- **Step 2:** Zahlen einblenden — gemessene Zeit pro Durchlauf für die CPU, das
+  Frame-Budget für die GPU, mit Bildgröße dazu.
+
+**Zur Messung:** Für die CPU messen wir die Dauer eines vollen Durchlaufs über
+das Bild. Für die GPU messen wir *nicht*. Die Bildwiederholrate deckelt jede
+Messung auf der Zeichenstrecke bei 16,7 ms — das ist der Monitor, nicht der
+Filter. Also nennen wir für die GPU das Frame-Budget und sagen ehrlich: der
+Shader passt in ein Frame, der Byte-Loop braucht Dutzende davon.
 
 ```kotlin
 val hookDemo by PreparedSlide(stepCount = 3) {
@@ -106,7 +113,8 @@ Bildgröße nennen.
 
 **3:00–3:40 · stepCount = 2**
 
-- **Step 0:** Die Messung als Balken — CPU-ms vs. GPU-ms, Bildgröße im Untertitel.
+- **Step 0:** Die Messung als Balken — CPU-Durchlauf vs. Frame-Budget, beides
+  zusätzlich in Frames, Bildgröße im Untertitel.
 - **Step 1:** Einblendung: *„Und der Byte-Loop lebt weiter."*
 
 *Notes:* Hier kommt die Wendung, die den Vortrag interessant macht. Der Shader hat
@@ -162,7 +170,7 @@ Das zentrale Modell — und das erste von drei Versprechen, die später eingelö
   verschiedenen Daten. SIMT.
 - **Step 2:** Grafik: ein `if`, bei dem die Hälfte der Gruppe in den einen und die
   Hälfte in den anderen Zweig will → die GPU läuft **beide** Zweige, jeweils mit
-  der Hälfte deaktiviert. Kosten: beide Zweige, Nutzen: einer.
+  der Hälfte deaktiviert. Die GPU zahlt für beide Zweige und nutzt einen.
 - **Step 3:** **Versprechen 1:** *Deshalb hat mein Shader kein einziges `if` im
   Pixelpfad.* (Einlösung auf Slide 11)
 
@@ -266,10 +274,10 @@ markiertem Abschnitt. Code links, Erklärung rechts oder darunter.
 |---|---|---|
 | 1 | `uniform`-Block | Uniforms sind pro Draw konstant, für alle Millionen Pixel gleich. Der Kanal von CPU nach GPU. |
 | 2 | `float3 c = float3(src.rgb) / alpha * 255.0;` | Compose/Skia liefern **premultiplied** Alpha, die Filterformeln brauchen unpremultiplied 0..255. Falsch herum → Halbtransparentes wird dunkler. |
-| 3 | `step8()` | Die CPU-Variante rundet und clamped nach **jedem** Schritt. Wer im Float bleibt, bekommt ein *anderes* Bild — nicht nur ein genaueres. |
-| 4 | Brightness-Zeile | Kein Offset, sondern eine Belichtungskurve: der Faktor hängt davon ab, wie hell das Pixel schon ist (`1 - summe/765`). Helle Bereiche brennen nicht aus. |
-| 5 | `contrastSlope` / `contrastIntercept` + Sprung nach `toImageAdjustUniforms()` | **Versprechen 2 eingelöst.** Kontrast ist mathematisch `(c - 127.5) * s + 127.5`. Ausmultipliziert wird daraus eine Multiplikation und eine Addition — der Rest ist zwei Zeilen Kotlin, einmal pro Draw. |
-| 6 | Saturation + Vibrance | Saturation mischt gegen das Luma (Rec.709-Gewichte: Grün zählt siebenmal so viel wie Blau). Vibrance zieht jeden Kanal zum eigenen Maximum, gewichtet mit dem Abstand zum Durchschnitt — d. h. schon bunte Pixel werden kaum angefasst. |
+| 3 | `step8()` | Die CPU-Variante rundet und clamped nach **jedem** Schritt. Wer im Float bleibt, bekommt ein *anderes* Bild, nicht nur ein genaueres. |
+| 4 | Brightness-Zeile | Die Helligkeit ist eine Belichtungskurve, kein Offset. Der Faktor hängt davon ab, wie hell das Pixel schon ist (`1 - summe/765`). Helle Bereiche brennen nicht aus. |
+| 5 | `contrastSlope` / `contrastIntercept` + Sprung nach `toImageAdjustUniforms()` | **Versprechen 2 eingelöst.** Kontrast ist mathematisch `(c - 127.5) * s + 127.5`. Ausmultipliziert wird daraus eine Multiplikation und eine Addition. Der Rest ist zwei Zeilen Kotlin, einmal pro Draw. |
+| 6 | Saturation + Vibrance | Saturation mischt gegen das Luma (Rec.709-Gewichte: Grün zählt siebenmal so viel wie Blau). Vibrance zieht jeden Kanal zum eigenen Maximum, gewichtet mit dem Abstand zum Durchschnitt, deshalb bleiben schon bunte Pixel fast unverändert. |
 | 7 | Sepia-Matrix | **Versprechen 3 eingelöst.** `float3x3` ist in AGSL/SkSL **column-major**. Die Konstruktor-Argumente stehen deshalb spaltenweise — die Matrix im Code ist die transponierte Lehrbuchmatrix. Wer sie „aufräumt", vertauscht R und B. |
 | 8 | `pow(c/255, gamma)` + Rückgabe | Gamma pro Kanal, deshalb ein `float3`-Uniform statt drei Floats. Am Ende wieder premultiplizieren, damit Compose bekommt, was es erwartet. |
 
@@ -370,7 +378,7 @@ Ehrliche Kostenseite. Macht den Vortrag glaubwürdiger als eine reine Erfolgssto
   *und* dort bleibt. Muss das Ergebnis zurück in den RAM, frisst der Readback den
   Gewinn. **Das ist der Grund, warum unser Byte-Loop weiterlebt.** (Auflösung des
   Spannungsbogens von Slide 3.)
-- **Step 2 — Zwei Implementierungen, eine Wahrheit:** Eine billigere Umformulierung
+- **Step 2 — Doppelte Wartung:** Eine billigere Umformulierung
   eines Schritts ändert, was der Kunde gedruckt bekommt. Absicherung:
   Pixelvergleichs-Tests zwischen beiden Pfaden.
 - **Step 3 — Debugging:** Kein Breakpoint, kein Log. Man debuggt, indem man
@@ -399,8 +407,8 @@ Die Checkliste zum Mitnehmen — alle drei müssen zutreffen.
 
 - **Step 0:**
 > **Wenn dieselbe simple Rechnung millionenfach auf unabhängigen Daten läuft und
-> das Ergebnis sowieso auf den Bildschirm soll, ist die GPU nicht der exotische,
-> sondern der naheliegende Ort.**
+> das Ergebnis sowieso auf den Bildschirm soll, ist die GPU der naheliegende
+> Ort.**
 >
 > Und der Einstieg kostet heute eine Funktion, nicht eine Grafik-Pipeline.
 

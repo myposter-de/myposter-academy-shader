@@ -71,7 +71,7 @@ val backupDivergenz: Slide = backup(
     "if (a <= 0.0) return half4(0.0);",
     "Divergenz kostet nur, wenn sie innerhalb einer Gruppe auftritt. " +
         "Diese Bedingung fällt für ein ganzes Bild fast immer einheitlich aus.",
-    "Teuer wären Verzweigungen, die vom Pixelwert abhängen — genau die, " +
+    "Teuer wären Verzweigungen, die vom Pixelwert abhängen, also genau die, " +
         "die die Filterschritte ersetzt hätten.",
 )
 
@@ -83,8 +83,8 @@ val backupPraezision: Slide = backup(
     "half ist auf Mobile-GPUs schneller, hat aber in der 0..255-Domäne zu wenige " +
         "Stufen für ein pixelgleiches Ergebnis.",
     "Deshalb float3 in der Rechnung und half4 nur am Ein- und Ausgang.",
-    "Präzision ist nicht garantiert gleich zwischen Geräten — der Grund für die " +
-        "Pixelvergleichs-Tests.",
+    "Präzision ist zwischen Geräten nicht garantiert gleich. Das ist der Grund " +
+        "für die Pixelvergleichs-Tests.",
 )
 
 val backupCompute: Slide = backup(
@@ -93,8 +93,8 @@ val backupCompute: Slide = backup(
     title = "Compute-Shader im Detail",
     notes = "Wenn jemand nach Blur oder Shared Memory fragt.",
     "Workgroups statt Pixelraster: du bestimmst selbst, welche Threads zusammengehören.",
-    "Shared Memory erlaubt Datenaustausch innerhalb einer Workgroup — " +
-        "das kann ein Fragment-Shader nicht.",
+    "Shared Memory erlaubt Datenaustausch innerhalb einer Workgroup, " +
+        "was ein Fragment-Shader nicht kann.",
     "Deshalb profitiert ein Blur davon: jedes Pixel braucht seine Nachbarn, " +
         "und die lassen sich einmal gemeinsam laden statt neunmal einzeln.",
 )
@@ -106,8 +106,8 @@ val backupTbdr: Slide = backup(
     notes = "Nur bei Fragen zu Android-Performance.",
     "Tile-based Rendering: das Bild wird in Kacheln zerlegt, die im schnellen " +
         "On-Chip-Speicher bearbeitet werden.",
-    "Der Engpass ist die Bandbreite zum Hauptspeicher, nicht die Arithmetik — " +
-        "Energiebudget statt Kühlkörper.",
+    "Die Bandbreite zum Hauptspeicher begrenzt, nicht die Arithmetik. " +
+        "Das Gerät hat ein Energiebudget, keinen Kühlkörper.",
     "Praktische Folge: ein Filter, der das Bild einmal liest und einmal schreibt, " +
         "ist auf Mobile fast gratis. Mehrfache Durchläufe sind es nicht.",
 )
@@ -119,7 +119,7 @@ val backupTensorCores: Slide = backup(
     notes = "Nicht von selbst aufschlagen — das ist ein eigener Vortrag.",
     "Eigene Einheiten, die kleine Matrixmultiplikationen in einem Schritt rechnen, " +
         "statt sie aus einzelnen Multiplikationen zusammenzusetzen.",
-    "Sie arbeiten in reduzierter Präzision — derselbe Handel wie bei der Quantisierung.",
+    "Sie arbeiten in reduzierter Präzision, derselbe Handel wie bei der Quantisierung.",
     "Deshalb ist ein aktueller Rechenzentrums-Chip keine große Grafikkarte mehr: " +
         "die Grafik-Pipeline ist darauf nur noch ein Teil.",
 )
@@ -129,7 +129,7 @@ val backupNpu: Slide = backup(
     id = "B7 · backupNpu",
     title = "NPUs auf dem Handy",
     notes = "Letzte Backup-Folie.",
-    "Richtig für feste Modelloperationen bei niedrigem Energieverbrauch — " +
+    "Richtig für feste Modelloperationen bei niedrigem Energieverbrauch: " +
         "Segmentierung, Erkennung, Upscaling.",
     "Falsch für unseren Bildfilter: das Ergebnis soll direkt gezeichnet werden, " +
         "und genau dafür ist die GPU der kürzere Weg.",

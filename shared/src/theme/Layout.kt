@@ -95,23 +95,13 @@ fun HeroFrame(
 
 @Composable
 fun SlideMeta(id: String, timing: String, modifier: Modifier = Modifier) {
-    Row(
+    Text(
+        text = id.substringBefore(" · "),
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom,
-    ) {
-        Text(
-            text = id,
-            style = MaterialTheme.typography.bodySmall,
-            fontFamily = monoFamily,
-            color = MaterialTheme.colorScheme.outline,
-        )
-        Text(
-            text = timing,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
-    }
+        style = MaterialTheme.typography.bodySmall,
+        fontFamily = monoFamily,
+        color = MaterialTheme.colorScheme.outline,
+    )
 }
 
 @Composable
@@ -263,10 +253,12 @@ fun BigStat(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
-    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    // Baseline, not center: the number is much larger than its caption. Centered,
+    // the caption floats. On the baseline the two sit on one line, as in print.
+    Row(modifier.fillMaxWidth()) {
         Text(
             text = value,
-            modifier = Modifier.width(valueWidth),
+            modifier = Modifier.width(valueWidth).alignByBaseline(),
             style = MaterialTheme.typography.displayMedium.let {
                 if (mono) it.copy(fontFamily = monoFamily) else it
             },
@@ -275,6 +267,7 @@ fun BigStat(
         Spacer(Modifier.width(20.dp))
         Text(
             text = text,
+            modifier = Modifier.alignByBaseline(),
             style = textStyle,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -50,29 +50,29 @@ private val codeSteps = listOf(
     CodeStep(
         "Step 3 · step8()",
         "Die CPU-Variante rundet und clamped nach jedem Schritt. Wer im Float bleibt, " +
-            "bekommt ein anderes Bild — nicht nur ein genaueres.",
+            "bekommt ein anderes Bild, nicht nur ein genaueres.",
     ),
     CodeStep(
         "Step 4 · Helligkeit",
-        "Kein Offset, sondern eine Belichtungskurve: der Faktor hängt davon ab, wie hell " +
-            "das Pixel schon ist. Helle Bereiche brennen nicht aus.",
+        "Die Helligkeit ist eine Belichtungskurve, kein Offset. Der Faktor hängt davon " +
+            "ab, wie hell das Pixel schon ist. Helle Bereiche brennen nicht aus.",
     ),
     CodeStep(
         "Step 5 · Versprechen 2 eingelöst",
         "Kontrast ist (c − 127.5) · s + 127.5. Ausmultipliziert bleiben eine Multiplikation " +
-            "und eine Addition — der Rest sind zwei Zeilen Kotlin, einmal pro Draw.",
+            "und eine Addition. Der Rest sind zwei Zeilen Kotlin, einmal pro Draw.",
         promise = 2,
     ),
     CodeStep(
         "Step 6 · Sättigung und Vibrance",
-        "Sättigung mischt gegen das Luma — Rec.709, Grün zählt siebenmal so viel wie Blau. " +
-            "Vibrance gewichtet mit dem Abstand zum Durchschnitt: schon bunte Pixel werden " +
-            "kaum angefasst.",
+        "Sättigung mischt gegen das Luma nach Rec.709, wo Grün siebenmal so viel zählt " +
+            "wie Blau. Vibrance gewichtet mit dem Abstand zum Durchschnitt, deshalb bleiben " +
+            "schon bunte Pixel fast unverändert.",
     ),
     CodeStep(
         "Step 7 · Versprechen 3 eingelöst",
         "float3x3 ist in AGSL und SkSL column-major. Die Konstruktor-Argumente stehen " +
-            "spaltenweise — im Code steht die transponierte Lehrbuchmatrix. Wer sie aufräumt, " +
+            "spaltenweise. Im Code steht die transponierte Lehrbuchmatrix. Wer sie aufräumt, " +
             "vertauscht Rot und Blau.",
         promise = 3,
     ),
@@ -267,10 +267,10 @@ val identitaet by Slide(
 
 @Composable
 private fun IdentityRow(field: String, identity: String) {
-    Row(Modifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
-        MonoCell(field, MaterialTheme.colorScheme.onBackground, Modifier.weight(1f))
+    Row(Modifier.fillMaxWidth().height(28.dp)) {
+        MonoCell(field, MaterialTheme.colorScheme.onBackground, Modifier.weight(1f).alignByBaseline())
         Spacer(Modifier.width(20.dp))
-        MonoCell(identity, MaterialTheme.deck.gpu)
+        MonoCell(identity, MaterialTheme.deck.gpu, Modifier.alignByBaseline())
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,15 +43,16 @@ object TalkState {
 fun TimingBadge(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Metric("CPU ${formatMs(TalkState.timings.cpuMedianMs)}/Frame", MaterialTheme.deck.cpu)
-        Metric("GPU ${formatMs(TalkState.timings.frameMedianMs)}/Frame", MaterialTheme.deck.gpu)
+        val timings = TalkState.timings
+        Metric("CPU ${formatMs(timings.cpuMedianMs)}/Durchlauf", MaterialTheme.deck.cpu)
+        Metric("GPU < ${formatMs(timings.frameBudgetMs)}/Frame", MaterialTheme.deck.gpu)
         Text(
             text = TalkState.demo
-                ?.let { "${it.width} × ${it.height} · Median nach Warmup" }
-                ?: "Median nach Warmup",
+                ?.let { "${it.width} × ${it.height} · CPU-Median nach Warmup" }
+                ?: "CPU-Median nach Warmup",
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
         )
@@ -58,9 +60,10 @@ fun TimingBadge(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Metric(text: String, color: Color) {
+private fun RowScope.Metric(text: String, color: Color) {
     Text(
         text = text,
+        modifier = Modifier.alignByBaseline(),
         style = MaterialTheme.typography.titleLarge,
         fontFamily = monoFamily,
         color = color,
@@ -74,6 +77,7 @@ fun TimingBar(
     ms: Double?,
     maxMs: Double,
     color: Color,
+    valueText: String,
     modifier: Modifier = Modifier,
 ) {
     val fraction = if (ms == null || maxMs <= 0.0) 0f else (ms / maxMs).coerceIn(0.015, 1.0).toFloat()
@@ -95,7 +99,7 @@ fun TimingBar(
             // A short bar has no room for its own label. It goes next to the bar instead.
             if (fraction > 0.25f) {
                 Text(
-                    text = formatMs(ms),
+                    text = valueText,
                     modifier = Modifier.padding(end = 14.dp),
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = monoFamily,
@@ -106,7 +110,7 @@ fun TimingBar(
         if (fraction <= 0.25f) {
             Spacer(Modifier.width(14.dp))
             Text(
-                text = formatMs(ms),
+                text = valueText,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = monoFamily,
                 color = color,

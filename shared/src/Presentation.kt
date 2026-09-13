@@ -83,10 +83,15 @@ fun ShaderTalk() {
             },
             backgroundColor = MaterialTheme.colorScheme.background,
         ) { slidesContent ->
-            CompositionLocalProvider(
-                LocalContentColor provides MaterialTheme.colorScheme.onBackground,
-            ) {
-                slidesContent()
+            // The theme must wrap slidesContent, not only the Presentation.
+            // CuP composes the slides here, so a theme applied only outside
+            // never reaches them and every text falls back to Material's sans.
+            ShaderTalkTheme {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+                ) {
+                    slidesContent()
+                }
             }
         }
     }
