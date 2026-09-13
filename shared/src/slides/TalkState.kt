@@ -49,9 +49,9 @@ fun TimingBadge(modifier: Modifier = Modifier) {
         Metric("CPU ${formatMs(timings.cpuMedianMs)}/Durchlauf", MaterialTheme.deck.cpu)
         Metric("GPU < ${formatMs(timings.frameBudgetMs)}/Frame", MaterialTheme.deck.gpu)
         Text(
-            text = TalkState.demo
-                ?.let { "${it.width} × ${it.height} · CPU-Median nach Warmup" }
-                ?: "CPU-Median nach Warmup",
+            text =
+                TalkState.demo?.let { "${it.width} × ${it.height} · CPU-Median nach Warmup" }
+                    ?: "CPU-Median nach Warmup",
             modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
@@ -80,7 +80,8 @@ fun TimingBar(
     valueText: String,
     modifier: Modifier = Modifier,
 ) {
-    val fraction = if (ms == null || maxMs <= 0.0) 0f else (ms / maxMs).coerceIn(0.015, 1.0).toFloat()
+    val fraction =
+        if (ms == null || maxMs <= 0.0) 0f else (ms / maxMs).coerceIn(0.015, 1.0).toFloat()
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = label,
@@ -90,10 +91,8 @@ fun TimingBar(
         )
         Spacer(Modifier.width(16.dp))
         Box(
-            modifier = Modifier
-                .weight(fraction.coerceAtLeast(0.015f))
-                .height(44.dp)
-                .background(color),
+            modifier =
+                Modifier.weight(fraction.coerceAtLeast(0.015f)).height(44.dp).background(color),
             contentAlignment = Alignment.CenterEnd,
         ) {
             // A short bar has no room for its own label. It goes next to the bar instead.

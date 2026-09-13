@@ -13,13 +13,14 @@ const val IMAGE_ADJUST_SHADER_INPUT: String = "image"
  * The same string runs as AGSL on Android 13+ and as SkSL under Compose Desktop.
  *
  * Three rules drive this code, and slide 11 walks through all three:
- *  1. No `if` in the pixel path. A GPU runs both branches of a divergent `if`.
- *  2. Everything that is constant per draw is a uniform, not an instruction.
- *  3. `float3x3` is column-major. The constructor arguments are the transpose
- *     of the textbook matrix.
+ * 1. No `if` in the pixel path. A GPU runs both branches of a divergent `if`.
+ * 2. Everything that is constant per draw is a uniform, not an instruction.
+ * 3. `float3x3` is column-major. The constructor arguments are the transpose of the textbook
+ *    matrix.
  */
 // language=GLSL
-val IMAGE_ADJUST_SHADER: String = """
+val IMAGE_ADJUST_SHADER: String =
+    """
 uniform shader $IMAGE_ADJUST_SHADER_INPUT;
 
 // One draw sets these once. All twelve million pixels read the same values.
@@ -91,7 +92,8 @@ half4 main(float2 coord) {
     float3 outColor = c / 255.0;
     return half4(half3(outColor * alpha), src.a);
 }
-""".trimIndent()
+"""
+        .trimIndent()
 
 /**
  * The starting point of the live playground on slide 9.
@@ -99,8 +101,10 @@ half4 main(float2 coord) {
  * Deliberately trivial: coordinates in, color out.
  */
 // language=GLSL
-val STARTER_SHADER: String = """
-half4 main(float2 coord) {
-    return half4(coord.x / 400.0, coord.y / 400.0, 0.5, 1.0);
-}
-""".trimIndent()
+val STARTER_SHADER: String =
+    """
+    half4 main(float2 coord) {
+        return half4(coord.x / 400.0, coord.y / 400.0, 0.5, 1.0);
+    }
+    """
+        .trimIndent()

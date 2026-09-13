@@ -8,9 +8,8 @@ import kotlin.math.roundToInt
 /**
  * The byte loop. The same math as [IMAGE_ADJUST_SHADER], one pixel at a time.
  *
- * This is not dead code that the shader replaced. Every path that reads the
- * result back as a bitmap instead of drawing it still uses this loop.
- * Both paths must agree pixel for pixel.
+ * This is not dead code that the shader replaced. Every path that reads the result back as a bitmap
+ * instead of drawing it still uses this loop. Both paths must agree pixel for pixel.
  *
  * @param src RGBA bytes, unpremultiplied, row major.
  * @param dst The destination buffer. Must have the same size as [src].
@@ -22,7 +21,10 @@ fun cpuImageAdjust(src: ByteArray, dst: ByteArray, adjust: ImageAdjust) {
     while (i < src.size) {
         val a = src[i + 3].toInt() and 0xFF
         if (a == 0) {
-            dst[i] = 0; dst[i + 1] = 0; dst[i + 2] = 0; dst[i + 3] = 0
+            dst[i] = 0
+            dst[i + 1] = 0
+            dst[i + 2] = 0
+            dst[i + 3] = 0
             i += 4
             continue
         }

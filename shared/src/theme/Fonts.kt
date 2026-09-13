@@ -22,12 +22,11 @@ import org.jetbrains.compose.resources.getSystemResourceEnvironment
 /**
  * Avenir Next, read once, before the first slide draws.
  *
- * The composable `Font(Res.font.…)` of Compose Resources loads in the
- * background. Until the bytes arrive it hands back the platform fallback, and
- * that fallback is wider than Avenir Next. A slide that fits in the design font
- * then wraps one line more and runs off its frame. A talk must not depend on
- * that race, so the deck reads the four faces itself and builds the family from
- * the bytes. The result is synchronous: it is either the right font or nothing.
+ * The composable `Font(Res.font.…)` of Compose Resources loads in the background. Until the bytes
+ * arrive it hands back the platform fallback, and that fallback is wider than Avenir Next. A slide
+ * that fits in the design font then wraps one line more and runs off its frame. A talk must not
+ * depend on that race, so the deck reads the four faces itself and builds the family from the
+ * bytes. The result is synchronous: it is either the right font or nothing.
  */
 suspend fun loadAvenirNext(): FontFamily {
     val env = getSystemResourceEnvironment()
@@ -40,7 +39,12 @@ suspend fun loadAvenirNext(): FontFamily {
     ) = Font(name, getFontResourceBytes(env, resource), weight, style)
 
     return FontFamily(
-        face("AvenirNext-HeavyItalic", Res.font.avenir_next_heavy_italic_font, FontWeight.Black, FontStyle.Italic),
+        face(
+            "AvenirNext-HeavyItalic",
+            Res.font.avenir_next_heavy_italic_font,
+            FontWeight.Black,
+            FontStyle.Italic,
+        ),
         face("AvenirNext-Bold", Res.font.avenir_next_bold_font, FontWeight.Bold),
         face("AvenirNext-Demi", Res.font.avenir_next_demi_font, FontWeight.SemiBold),
         face("AvenirNext-Regular", Res.font.avenir_next_regular_font, FontWeight.Normal),
@@ -50,9 +54,9 @@ suspend fun loadAvenirNext(): FontFamily {
 /**
  * The family, once loaded. Held outside the composition on purpose.
  *
- * CuP composes a slide in a composition of its own, so every slide frame builds
- * the theme again. Without this cache each of them would read the four files
- * again and flash an empty frame while it waits.
+ * CuP composes a slide in a composition of its own, so every slide frame builds the theme again.
+ * Without this cache each of them would read the four files again and flash an empty frame while it
+ * waits.
  */
 private var loaded: FontFamily? = null
 

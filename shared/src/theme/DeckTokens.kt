@@ -69,6 +69,4 @@ internal val LocalDeckTokens = staticCompositionLocalOf { lightDeckTokens }
 
 /** The deck tokens of the current theme. */
 val MaterialTheme.deck: DeckTokens
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalDeckTokens.current
+    @Composable @ReadOnlyComposable get() = LocalDeckTokens.current

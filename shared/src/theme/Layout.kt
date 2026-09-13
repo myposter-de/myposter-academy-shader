@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 /**
  * The frame every slide shares: a meta row, a heading, then the body.
  *
- * @param id        the slide name and its number, shown top left.
- * @param timing    the minute range and the step count, shown top right.
- * @param title     the heading. Pass null for a slide that carries its own.
+ * @param id the slide name and its number, shown top left.
+ * @param timing the minute range and the step count, shown top right.
+ * @param title the heading. Pass null for a slide that carries its own.
  */
 @Composable
 fun SlideFrame(
@@ -44,10 +44,16 @@ fun SlideFrame(
 ) {
     val deck = MaterialTheme.deck
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(start = deck.padH, end = deck.padH, top = deck.padTop, bottom = deck.padBottom),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(
+                    start = deck.padH,
+                    end = deck.padH,
+                    top = deck.padTop,
+                    bottom = deck.padBottom,
+                )
     ) {
         SlideMeta(id, timing)
         if (title != null) {
@@ -60,8 +66,8 @@ fun SlideFrame(
 }
 
 /**
- * A slide that centers one block on the dark ground: the title, "Fragen?", the
- * takeaway and the backup divider.
+ * A slide that centers one block on the dark ground: the title, "Fragen?", the takeaway and the
+ * backup divider.
  */
 @Composable
 fun HeroFrame(
@@ -73,15 +79,16 @@ fun HeroFrame(
     DarkSection {
         val deck = MaterialTheme.deck
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(
-                    start = deck.padH,
-                    end = deck.padH,
-                    top = deck.padTop,
-                    bottom = deck.padBottom,
-                ),
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(
+                        start = deck.padH,
+                        end = deck.padH,
+                        top = deck.padTop,
+                        bottom = deck.padBottom,
+                    )
         ) {
             SlideMeta(id, timing, Modifier.align(Alignment.TopStart))
             Column(
@@ -135,8 +142,8 @@ fun AccentRule(modifier: Modifier = Modifier, color: Color = MaterialTheme.color
 /**
  * A step of the slide.
  *
- * A step the speaker has not reached yet stays in place and fades to
- * [DeckTokens.dim], the way the storyboard shows it. Nothing jumps.
+ * A step the speaker has not reached yet stays in place and fades to [DeckTokens.dim], the way the
+ * storyboard shows it. Nothing jumps.
  */
 @Composable
 fun Step(
@@ -150,8 +157,8 @@ fun Step(
 }
 
 /**
- * A step that replaces the one before it. The code walkthrough uses it:
- * eight stacked explanations do not fit the frame at slide type sizes.
+ * A step that replaces the one before it. The code walkthrough uses it: eight stacked explanations
+ * do not fit the frame at slide type sizes.
  */
 @Composable
 fun SoloStep(
@@ -218,10 +225,11 @@ fun Card(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(MaterialTheme.deck.cornerL))
-            .background(background)
-            .padding(padding),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(MaterialTheme.deck.cornerL))
+                .background(background)
+                .padding(padding),
         content = content,
     )
 }
@@ -234,10 +242,11 @@ fun CodePanel(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(MaterialTheme.deck.cornerM))
-            .background(MaterialTheme.deck.codeSurface)
-            .padding(padding),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(MaterialTheme.deck.cornerM))
+                .background(MaterialTheme.deck.codeSurface)
+                .padding(padding),
         content = content,
     )
 }
@@ -259,9 +268,10 @@ fun BigStat(
         Text(
             text = value,
             modifier = Modifier.width(valueWidth).alignByBaseline(),
-            style = MaterialTheme.typography.displayMedium.let {
-                if (mono) it.copy(fontFamily = monoFamily) else it
-            },
+            style =
+                MaterialTheme.typography.displayMedium.let {
+                    if (mono) it.copy(fontFamily = monoFamily) else it
+                },
             color = valueColor,
         )
         Spacer(Modifier.width(20.dp))
@@ -302,10 +312,9 @@ fun ColumnScope.Fill(
 @Composable
 fun ThreadCell(active: Boolean, size: androidx.compose.ui.unit.Dp = 20.dp) {
     Box(
-        Modifier
-            .width(size)
+        Modifier.width(size)
             .height(size)
-            .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.deck.idle),
+            .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.deck.idle)
     )
 }
 

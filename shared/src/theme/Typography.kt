@@ -1,7 +1,6 @@
 package de.myposter.academy.shaders.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -15,29 +14,32 @@ val monoFamily: FontFamily = FontFamily.Monospace
 /**
  * The sizes below are the storyboard values divided by two.
  *
- * A CuP slide is 640 × 360 dp and the storyboard is 1920 × 1080 px, so the
- * deck runs at a 960 × 540 dp slide size. See `Presentation.kt`.
+ * A CuP slide is 640 × 360 dp and the storyboard is 1920 × 1080 px, so the deck runs at a 960 × 540
+ * dp slide size. See `Presentation.kt`.
  */
 fun deckTypography(family: FontFamily): Typography {
-    val base = TextStyle.Default.copy(
-        fontFamily = family,
-        lineHeightStyle = LineHeightStyle(
-            alignment = LineHeightStyle.Alignment.Center,
-            trim = LineHeightStyle.Trim.None,
-        ),
-    )
+    val base =
+        TextStyle.Default.copy(
+            fontFamily = family,
+            lineHeightStyle =
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.None,
+                ),
+        )
     val bold = base.copy(fontWeight = FontWeight.Bold)
     val demi = base.copy(fontWeight = FontWeight.SemiBold)
 
     return Typography(
         // --t-hero, in Avenir Next Heavy Italic. Title, "Fragen?" and "Backup".
-        displayLarge = base.copy(
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            fontSize = 59.sp,
-            lineHeight = 70.sp,
-            letterSpacing = 0.25.sp,
-        ),
+        displayLarge =
+            base.copy(
+                fontWeight = FontWeight.Black,
+                fontStyle = FontStyle.Italic,
+                fontSize = 59.sp,
+                lineHeight = 70.sp,
+                letterSpacing = 0.25.sp,
+            ),
         // --t-huge. The two numbers on "Die Größenordnung" and the checklist.
         displayMedium = bold.copy(fontSize = 52.sp, lineHeight = 52.sp, letterSpacing = (-1).sp),
         // The takeaway sentence.

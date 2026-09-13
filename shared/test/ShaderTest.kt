@@ -5,11 +5,11 @@ import de.myposter.academy.shaders.shader.ImageAdjust
 import de.myposter.academy.shaders.shader.STARTER_SHADER
 import de.myposter.academy.shaders.shader.cpuImageAdjust
 import de.myposter.academy.shaders.shader.toImageAdjustUniforms
-import org.jetbrains.skia.RuntimeEffect
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.jetbrains.skia.RuntimeEffect
 
 class ShaderTest {
 

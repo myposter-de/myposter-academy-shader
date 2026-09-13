@@ -2,20 +2,20 @@ package de.myposter.academy.shaders.shader
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import org.jetbrains.skia.ColorAlphaType
-import org.jetbrains.skia.ColorType
-import org.jetbrains.skia.Image
-import org.jetbrains.skia.ImageInfo
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.PI
 import kotlin.math.hypot
 import kotlin.math.sin
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.Image
+import org.jetbrains.skia.ImageInfo
 
 /**
- * The fixed test image of the talk. Always the same pixels, so the numbers
- * on slide 3 are reproducible.
+ * The fixed test image of the talk. Always the same pixels, so the numbers on slide 3 are
+ * reproducible.
  *
  * @property rgba Unpremultiplied RGBA bytes, row major.
  */
@@ -24,10 +24,12 @@ class DemoImage(
     val height: Int,
     val rgba: ByteArray,
 ) {
-    val pixelCount: Int get() = width * height
+    val pixelCount: Int
+        get() = width * height
 
     /** The megapixel count, for the caption under the demo. */
-    val megaPixels: Double get() = pixelCount / 1_000_000.0
+    val megaPixels: Double
+        get() = pixelCount / 1_000_000.0
 
     fun toImageBitmap(): ImageBitmap = rgbaToImageBitmap(width, height, rgba)
 }
@@ -39,9 +41,9 @@ const val DEMO_HEIGHT: Int = 3000
 /**
  * Loads the demo image.
  *
- * Set the system property `shadertalk.photo` to a JPEG or PNG path to use a
- * real photo. Without it, the image is generated, so the repository stays
- * free of binary assets and the demo still runs anywhere.
+ * Set the system property `shadertalk.photo` to a JPEG or PNG path to use a real photo. Without it,
+ * the image is generated, so the repository stays free of binary assets and the demo still runs
+ * anywhere.
  */
 fun loadDemoImage(width: Int = DEMO_WIDTH, height: Int = DEMO_HEIGHT): DemoImage {
     val path = System.getProperty("shadertalk.photo")
@@ -71,9 +73,8 @@ private fun readPhoto(file: File): DemoImage {
 }
 
 /**
- * Generates a photo-like test image: a sky gradient, a sun, a landscape band
- * and fine detail. It covers highlights, shadows and saturated color, so the
- * filter steps all have something to act on.
+ * Generates a photo-like test image: a sky gradient, a sun, a landscape band and fine detail. It
+ * covers highlights, shadows and saturated color, so the filter steps all have something to act on.
  */
 private fun generateDemoImage(width: Int, height: Int): DemoImage {
     val rgba = ByteArray(width * height * 4)
