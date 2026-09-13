@@ -1,9 +1,7 @@
 package de.myposter.academy.shaders.theme
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,47 +15,176 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
-/** The standard frame: a title at the top, the content below. */
+/**
+ * The frame every slide shares: a meta row, a heading, then the body.
+ *
+ * @param id        the slide name and its number, shown top left.
+ * @param timing    the minute range and the step count, shown top right.
+ * @param title     the heading. Pass null for a slide that carries its own.
+ */
 @Composable
-fun ColumnScope.TitledSlide(
-    title: String,
+fun SlideFrame(
+    id: String,
+    timing: String,
+    title: String? = null,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val deck = MaterialTheme.deck
     Column(
-        modifier = modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 28.dp),
-        verticalArrangement = Arrangement.Top,
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(start = deck.padH, end = deck.padH, top = deck.padTop, bottom = deck.padBottom),
     ) {
-        SlideTitle(title)
-        Spacer(Modifier.height(20.dp))
+        SlideMeta(id, timing)
+        if (title != null) {
+            Spacer(Modifier.height(14.dp))
+            SlideHeading(title)
+            Spacer(Modifier.height(deck.gapTitle))
+        }
         content()
     }
 }
 
+/**
+ * A slide that centers one block on the dark ground: the title, "Fragen?", the
+ * takeaway and the backup divider.
+ */
 @Composable
-fun SlideTitle(text: String, modifier: Modifier = Modifier) {
-    Column(modifier) {
-        Text(
-            text = text,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Palette.OnBackground,
-        )
-        Spacer(Modifier.height(6.dp))
-        Box(Modifier.width(56.dp).height(3.dp).background(Palette.Accent))
+fun HeroFrame(
+    id: String,
+    timing: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    DarkSection {
+        val deck = MaterialTheme.deck
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(
+                    start = deck.padH,
+                    end = deck.padH,
+                    top = deck.padTop,
+                    bottom = deck.padBottom,
+                ),
+        ) {
+            SlideMeta(id, timing, Modifier.align(Alignment.TopStart))
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                content = content,
+            )
+        }
     }
+}
+
+@Composable
+fun SlideMeta(id: String, timing: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Text(
+            text = id,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = monoFamily,
+            color = MaterialTheme.colorScheme.outline,
+        )
+        Text(
+            text = timing,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
+    }
+}
+
+@Composable
+fun SlideHeading(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        modifier = modifier,
+        style = MaterialTheme.typography.headlineLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+    )
+}
+
+/** The hero title, in Avenir Next Heavy Italic. */
+@Composable
+fun HeroTitle(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text.uppercase(),
+        modifier = modifier,
+        style = MaterialTheme.typography.displayLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+    )
+}
+
+/** The blue rule above a hero title. */
+@Composable
+fun AccentRule(modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary) {
+    val deck = MaterialTheme.deck
+    Box(modifier.width(deck.ruleWidth).height(deck.ruleHeight).background(color))
+}
+
+/**
+ * A step of the slide.
+ *
+ * A step the speaker has not reached yet stays in place and fades to
+ * [DeckTokens.dim], the way the storyboard shows it. Nothing jumps.
+ */
+@Composable
+fun Step(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val target = if (visible) 1f else MaterialTheme.deck.dim
+    val alpha = animateFloatAsState(target, tween(250), label = "step").value
+    Box(modifier.alpha(alpha)) { content() }
+}
+
+/**
+ * A step that replaces the one before it. The code walkthrough uses it:
+ * eight stacked explanations do not fit the frame at slide type sizes.
+ */
+@Composable
+fun SoloStep(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    if (visible) Box(modifier) { content() }
+}
+
+/** The uppercase label above a card or a step. */
+@Composable
+fun SectionLabel(
+    text: String,
+    color: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text.uppercase(),
+        modifier = modifier,
+        style = MaterialTheme.typography.labelLarge,
+        color = color,
+    )
 }
 
 /** A body line of a slide. */
@@ -65,109 +192,147 @@ fun SlideTitle(text: String, modifier: Modifier = Modifier) {
 fun Body(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Palette.OnBackground,
-    size: Int = 17,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    style: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
-    Text(text, modifier, color = color, fontSize = size.sp, lineHeight = (size * 1.45).sp)
+    Text(text, modifier, color = color, style = style)
 }
 
+/** A small line of a slide: a caption, a source note, a card body. */
 @Composable
-fun Body(
-    text: AnnotatedString,
-    modifier: Modifier = Modifier,
-    color: Color = Palette.OnBackground,
-    size: Int = 17,
-) {
-    Text(text, modifier, color = color, fontSize = size.sp, lineHeight = (size * 1.45).sp)
-}
-
-@Composable
-fun Muted(text: String, modifier: Modifier = Modifier, size: Int = 14) {
-    Text(text, modifier, color = Palette.Muted, fontSize = size.sp, lineHeight = (size * 1.45).sp)
-}
-
-/** A step that fades in. Use it for every progressive reveal of the deck. */
-@Composable
-fun Reveal(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = fadeIn(tween(350)),
-        exit = fadeOut(tween(200)),
-    ) {
-        content()
-    }
-}
-
-/** A boxed statement. Use it for the key sentence of a slide. */
-@Composable
-fun Statement(
+fun Caption(
     text: String,
     modifier: Modifier = Modifier,
-    accent: Color = Palette.Accent,
-    size: Int = 20,
+    color: Color = MaterialTheme.colorScheme.outline,
 ) {
-    Row(
+    Text(text, modifier, color = color, style = MaterialTheme.typography.bodyMedium)
+}
+
+/** A monospace line: a shader fragment, a uniform name, a compiler error. */
+@Composable
+fun Mono(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+) {
+    Text(text, modifier, color = color, style = style.copy(fontFamily = monoFamily))
+}
+
+/** A rounded card. The cost slides, the kostenmodell and the leiter use it. */
+@Composable
+fun Card(
+    modifier: Modifier = Modifier,
+    background: Color = MaterialTheme.deck.panel,
+    padding: androidx.compose.ui.unit.Dp = 24.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(Palette.Surface)
-            .padding(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.width(4.dp).height((size * 3).dp).background(accent))
+            .clip(RoundedCornerShape(MaterialTheme.deck.cornerL))
+            .background(background)
+            .padding(padding),
+        content = content,
+    )
+}
+
+/** A dark code block. */
+@Composable
+fun CodePanel(
+    modifier: Modifier = Modifier,
+    padding: androidx.compose.ui.unit.Dp = 20.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(MaterialTheme.deck.cornerM))
+            .background(MaterialTheme.deck.codeSurface)
+            .padding(padding),
+        content = content,
+    )
+}
+
+/** A number and its caption, side by side. "Die Größenordnung" and the checklist use it. */
+@Composable
+fun BigStat(
+    value: String,
+    text: String,
+    valueColor: Color = MaterialTheme.colorScheme.onBackground,
+    valueWidth: androidx.compose.ui.unit.Dp = 310.dp,
+    mono: Boolean = false,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = value,
+            modifier = Modifier.width(valueWidth),
+            style = MaterialTheme.typography.displayMedium.let {
+                if (mono) it.copy(fontFamily = monoFamily) else it
+            },
+            color = valueColor,
+        )
+        Spacer(Modifier.width(20.dp))
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            color = Palette.OnBackground,
-            fontSize = size.sp,
-            lineHeight = (size * 1.4).sp,
-            fontWeight = FontWeight.Medium,
+            style = textStyle,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
-/** A labelled promise that a later slide pays back. */
+/** A centered block. */
 @Composable
-fun Promise(number: Int, text: String, modifier: Modifier = Modifier, paid: Boolean = false) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(Palette.Surface)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = if (paid) "Versprechen $number ✓" else "Versprechen $number",
-            color = if (paid) Palette.Gpu else Palette.Accent,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(Modifier.width(14.dp))
-        Text(text, color = Palette.OnBackground, fontSize = 17.sp, lineHeight = 24.sp)
-    }
-}
-
-/** A centered quote. Use it for the title and the takeaway. */
-@Composable
-fun ColumnScope.CenteredBlock(content: @Composable ColumnScope.() -> Unit) {
+fun CenteredBlock(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 56.dp),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         content = content,
     )
 }
 
+/** Fills the rest of the slide and centers its content vertically. */
 @Composable
-fun BigNumber(value: String, label: String, color: Color, modifier: Modifier = Modifier) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, color = color, fontSize = 34.sp, fontWeight = FontWeight.Bold)
-        Text(label, color = Palette.Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+fun ColumnScope.Fill(
+    spacedBy: androidx.compose.ui.unit.Dp = 0.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = Modifier.weight(1f).fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacedBy, Alignment.CenterVertically),
+        content = content,
+    )
+}
+
+/** A square that stands for one GPU thread. */
+@Composable
+fun ThreadCell(active: Boolean, size: androidx.compose.ui.unit.Dp = 20.dp) {
+    Box(
+        Modifier
+            .width(size)
+            .height(size)
+            .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.deck.idle),
+    )
+}
+
+/** A row of thread cells. */
+@Composable
+fun ThreadRow(pattern: List<Boolean>, modifier: Modifier = Modifier) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        pattern.forEach { ThreadCell(it) }
+    }
+}
+
+/** A short note in the middle of an empty image slot. */
+@Composable
+fun CenterText(text: String, color: Color, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = color,
+            textAlign = TextAlign.Center,
+        )
     }
 }

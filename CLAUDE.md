@@ -35,9 +35,11 @@ CuP colors source code with highlight.js on GraalJS. GraalJS calls
 ```
 shared/src/
   Presentation.kt        Slides list + the Presentation composable
-  theme/                 Palette, typography, layout widgets
+  Screenshots.kt         Renders every slide to PNG, headless
+  theme/                 Colors, typography, deck tokens, layout widgets
   shader/                The shader, the CPU twin, the demo image, timings
   slides/                One file per section of the talk
+shared/composeResources/font/   Avenir Next, from the MYPOSTER design system
 shared/test/             Shader compile tests and CPU/GPU parity tests
 ```
 
@@ -60,6 +62,33 @@ Both files are the source of truth. Change them first, then the code.
 - Speaker notes are `SpeakerNotes("markdown")` in the slide `context`.
   The docs name `SpeakerNotesMD`. That class does not exist in Beta-17.
 - Backup slides carry `Export.none()`, so they stay out of the PDF export.
+
+## Design
+
+The deck follows the MYPOSTER design system and the storyboard
+`GPU-Shader Storyboard.dc.html` in the Claude Design project
+`b800b9cf-e2eb-4bc1-9989-765e32c7b1a4`.
+
+- Read every token through `MaterialTheme`: `colorScheme`, `typography` and
+  `MaterialTheme.deck` for what Material has no slot for. Never write a raw
+  `Color(0xFF…)` or a bare `sp` outside `shared/src/theme/`.
+- `theme/Color.kt` is the only file that holds color literals. They come from
+  the design system's `colors_and_type.css`.
+- The slide size is 960 × 540 dp, half of the 1920 × 1080 px storyboard.
+  Every storyboard value converts by a division by two.
+- A slide on the dark ground wraps its frame in `DarkSection`, or uses
+  `HeroFrame`, which does it already.
+- `Step(visible)` fades an unreached step to 14 % instead of hiding it, the way
+  the storyboard shows it. `SoloStep` replaces one step with the next.
+- `stepCount` is the highest step index plus one. The meta line counts reveals,
+  so `stepCount` is usually one higher than the number in the meta line.
+
+## Screenshots
+
+`./kotlin run -m desktopApp --jvm-args="-Dshadertalk.screenshots=<dir>"`
+renders every slide at every step to PNG and exits. Use it to review a layout
+change without clicking through twenty slides. The live demo images stay empty
+there — the harness never drags the slider.
 
 ## The shader
 

@@ -1,6 +1,7 @@
 package de.myposter.academy.shaders
 
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import de.myposter.academy.shaders.slides.agenda
@@ -22,10 +23,10 @@ import de.myposter.academy.shaders.slides.titel
 import de.myposter.academy.shaders.slides.wannLohntEs
 import de.myposter.academy.shaders.slides.warumSchnell
 import de.myposter.academy.shaders.slides.wasIstEinShader
-import de.myposter.academy.shaders.theme.Palette
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import de.myposter.academy.shaders.theme.ShaderTalkTheme
 import net.kodein.cup.Presentation
-import net.kodein.cup.SLIDE_SIZE_16_9
 import net.kodein.cup.SlideSpecs
 import net.kodein.cup.Slides
 import net.kodein.cup.TransitionSet
@@ -56,6 +57,14 @@ val talkSlides: Slides = Slides(
     backupSlides,
 )
 
+/**
+ * The slide size of the deck: half of the 1920 × 1080 px storyboard.
+ *
+ * CuP's own `SLIDE_SIZE_16_9` is 640 × 360 dp. The deck uses 960 × 540 dp so
+ * every storyboard value converts by a plain division by two.
+ */
+val SLIDE_SIZE: DpSize = DpSize(960.dp, 540.dp)
+
 @Composable
 fun ShaderTalk() {
     ShaderTalkTheme {
@@ -67,14 +76,16 @@ fun ShaderTalk() {
                 imageExport()
                 // A full SlideSpecs is required: CuP does not merge defaults into it.
                 defaultSlideSpecs = SlideSpecs(
-                    size = SLIDE_SIZE_16_9,
+                    size = SLIDE_SIZE,
                     startTransitions = TransitionSet.fade,
                     endTransitions = TransitionSet.fade,
                 )
             },
-            backgroundColor = Palette.Background,
+            backgroundColor = MaterialTheme.colorScheme.background,
         ) { slidesContent ->
-            CompositionLocalProvider(LocalContentColor provides Palette.OnBackground) {
+            CompositionLocalProvider(
+                LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+            ) {
                 slidesContent()
             }
         }

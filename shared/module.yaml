@@ -12,6 +12,8 @@ dependencies:
   - $compose.hotReload.runtimeApi
   - $libs.androidx.lifecycle.viewmodel.compose
   - $libs.androidx.lifecycle.runtime.compose
+  # CuP exposes ImmutableList in its public API (Slides.slideList).
+  - $libs.kotlinx.collections.immutable
   # Compose ur Pres — https://github.com/KodeinKoders/CuP
   - $libs.cup: exported
   - $libs.cup.widgets.material3: exported

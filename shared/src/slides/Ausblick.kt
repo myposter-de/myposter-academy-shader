@@ -1,193 +1,215 @@
 package de.myposter.academy.shaders.slides
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.myposter.academy.shaders.theme.Body
-import de.myposter.academy.shaders.theme.Muted
-import de.myposter.academy.shaders.theme.Palette
-import de.myposter.academy.shaders.theme.Reveal
-import de.myposter.academy.shaders.theme.Statement
-import de.myposter.academy.shaders.theme.TitledSlide
+import de.myposter.academy.shaders.theme.Caption
+import de.myposter.academy.shaders.theme.DarkSection
+import de.myposter.academy.shaders.theme.Fill
+import de.myposter.academy.shaders.theme.SectionLabel
+import de.myposter.academy.shaders.theme.SlideFrame
+import de.myposter.academy.shaders.theme.Step
+import de.myposter.academy.shaders.theme.deck
+import de.myposter.academy.shaders.theme.monoFamily
 import net.kodein.cup.Slide
 import net.kodein.cup.speaker.SpeakerNotes
 
 // Slide 13 — 15:00–16:30
 val leiter by Slide(
-    stepCount = 5,
+    stepCount = 6,
     context = SpeakerNotes(
         """
-        Stufe 2 ist die eigentliche Nachricht dieser Folie:
-        Der Einstieg kostet heute eine Funktion, nicht eine Grafik-Pipeline.
-        Das war vor fünf Jahren anders.
+        Stufe 2 ist die eigentliche Nachricht dieser Folie: Der Einstieg kostet
+        heute eine Funktion, nicht eine Grafik-Pipeline. Das war vor fünf Jahren
+        anders.
         """
     )
 ) { step ->
-    TitledSlide("Die Leiter — von „kein Shader-Code“ bis „volle Kontrolle“") {
-        Column(Modifier.fillMaxWidth()) {
-            Rung(
-                visible = step >= 1,
-                level = "1",
-                title = "Deklarative Filter",
-                text = "CSS filter, SVG-Primitives, Canvas filter, ColorMatrixColorFilter. Nutzen intern die GPU.",
-            )
-            Rung(
-                visible = step >= 2,
-                level = "2",
-                title = "Shader ohne Pipeline",
-                text = "AGSL (RuntimeShader, Android 13+), SkSL (Skia, Compose Desktop), CSS Houdini. Du schreibst nur main().",
-                highlight = true,
-            )
-            Rung(
-                visible = step >= 3,
-                level = "3",
-                title = "Abstraktion über der Pipeline",
-                text = "PixiJS, regl, Three.js, glfx.js.",
-            )
-            Rung(
-                visible = step >= 4,
-                level = "4",
-                title = "Volle Kontrolle",
-                text = "WebGL / WebGPU, OpenGL / Metal / Vulkan.",
-            )
-            Rung(
-                visible = step >= 5,
-                level = "×",
-                title = "Querschnitt: Compute-Shader",
-                text = "Wenn das Ergebnis gar nicht auf den Bildschirm soll.",
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Reveal(step >= 2) {
-            Muted("Hier läuft mein Code. Und hier läuft diese Präsentation.", size = 15)
+    SlideFrame(
+        id = "13 · leiter",
+        timing = "15:00–16:30 · 5 Steps",
+        title = "Die Leiter der Abstraktionen",
+    ) {
+        Fill(spacedBy = 10.dp) {
+            Step(step >= 1) {
+                Rung(
+                    "01",
+                    "Deklarative Filter",
+                    "CSS filter, SVG-Primitives, ColorMatrixColorFilter — nutzen intern die GPU",
+                )
+            }
+            Step(step >= 2) {
+                Rung(
+                    number = "02",
+                    title = "Shader ohne Pipeline",
+                    text = "AGSL, SkSL, Paint Worklets. Du schreibst nur main(). " +
+                        "Hier läuft mein Code. Und hier läuft diese Präsentation.",
+                    background = MaterialTheme.deck.panelSuccess,
+                    numberColor = MaterialTheme.deck.gpu,
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            Step(step >= 3) {
+                Rung("03", "Abstraktion über der Pipeline", "PixiJS, regl, Three.js, glfx.js")
+            }
+            Step(step >= 4) {
+                Rung("04", "Volle Kontrolle", "WebGL, WebGPU, OpenGL, Metal, Vulkan")
+            }
+            Step(step >= 5) {
+                Rung(
+                    "05",
+                    "Querschnitt",
+                    "Compute-Shader, wenn das Ergebnis gar nicht auf den Bildschirm soll",
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun Rung(
-    visible: Boolean,
-    level: String,
+    number: String,
     title: String,
     text: String,
-    highlight: Boolean = false,
+    background: Color = MaterialTheme.deck.panel,
+    numberColor: Color = MaterialTheme.colorScheme.outline,
+    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
-    Reveal(visible) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(Palette.Surface)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = level,
-                color = if (highlight) Palette.Accent else Palette.Muted,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(20.dp),
-            )
-            Column {
-                Text(
-                    text = title,
-                    color = if (highlight) Palette.Accent else Palette.OnBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Muted(text, size = 12)
-            }
-        }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(MaterialTheme.deck.cornerM))
+            .background(background)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = number,
+            modifier = Modifier.width(40.dp),
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = monoFamily,
+            color = numberColor,
+        )
+        Text(
+            text = title,
+            modifier = Modifier.width(260.dp),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.width(12.dp))
+        Caption(text, Modifier.weight(1f), color = textColor)
     }
 }
 
 // Slide 14 — 16:30–17:45
 val computeUndKi by Slide(
-    stepCount = 5,
+    stepCount = 6,
     context = SpeakerNotes(
         """
-        Kernsatz für diese Folie:
-        **„Die GPU ist keine Grafikkarte, die man für KI zweckentfremdet hat.
-        Sie ist eine Durchsatzmaschine, und Grafik war ihre erste Anwendung."**
+        Kernsatz: „Die GPU ist keine Grafikkarte, die man für KI zweckentfremdet
+        hat. Sie ist eine Durchsatzmaschine, und Grafik war ihre erste
+        Anwendung.“
 
-        Nicht in Details zu Tensor Cores abbiegen — das ist ein eigener Vortrag.
-        Falls jemand nachhakt: Backup-Slide `backupTensorCores`.
-
-        Wenn du über der Zeit bist: Step 2 (Geschichte) ist der entbehrlichste.
-        Die beiden Rückbezüge sind der Grund, warum die Folie existiert.
+        Nicht in Tensor-Core-Details abbiegen — eigener Vortrag, siehe Backup.
+        Über der Zeit: Step 2 ist der entbehrlichste.
         """
     )
 ) { step ->
-    TitledSlide("Dasselbe Prinzip, ganz anderes Feld") {
-        Column(Modifier.fillMaxWidth()) {
-            Point(
-                visible = step >= 1,
-                title = "Die Pipeline weglassen",
-                text = "Ein Compute-Shader ist ein Shader ohne Rasterizer und ohne Framebuffer. " +
-                    "Übrig bleibt der Kern: eine Funktion für hunderttausende unabhängige Datenpunkte. " +
-                    "Das Ergebnis geht in einen Buffer statt in ein Bild.",
-            )
-            Point(
-                visible = step >= 2,
-                title = "Die Geschichte",
-                text = "Vor CUDA haben Forscher ihre Daten als Textur verpackt, durch einen Fragment-Shader " +
-                    "geschickt und das Bild wieder ausgelesen. „GPGPU“. Die Hardware war für Pixel gebaut, " +
-                    "die Mathematik war es nie.",
-            )
-            Point(
-                visible = step >= 3,
-                title = "Warum ausgerechnet neuronale Netze",
-                text = "Ein Layer ist im Kern eine Matrixmultiplikation. Millionen unabhängige Multiplikationen " +
-                    "und Additionen, identische Operation, keine Verzweigung auf Datenbasis. " +
-                    "Dieselbe Form wie mein Bildfilter.",
-                accent = Palette.Accent,
-            )
-            Point(
-                visible = step >= 4,
-                title = "Rückbezug 1 — Bandbreite",
-                text = "Bei LLM-Inferenz ist der Engpass nicht die Rechenleistung, sondern die Speicherbandbreite. " +
-                    "Mein Filter ist auch nicht rechenlimitiert, sondern limitiert durch Lesen und Schreiben des Bildes.",
-                accent = Palette.Gpu,
-            )
-            Point(
-                visible = step >= 5,
-                title = "Rückbezug 2 — Quantisierung",
-                text = "Wie viele Bits brauche ich wirklich? In der KI-Welt heißt das fp32 → fp16 → int8 → int4. " +
-                    "Dieselbe Abwägung wie bei step8(): weniger Präzision, mehr Durchsatz, irgendwo eine Grenze.",
-                accent = Palette.Gpu,
-            )
+    DarkSection {
+        SlideFrame(
+            id = "14 · computeUndKi",
+            timing = "16:30–17:45 · 5 Steps",
+            title = "Compute-Shader und KI",
+        ) {
+            // Two columns. The left one walks the argument, the right one
+            // carries the two back-references to earlier slides.
+            Row(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(40.dp),
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                ) {
+                    Step(step >= 1) {
+                        ComputePoint(
+                            "Die Pipeline weglassen",
+                            MaterialTheme.deck.teal,
+                            "Ein Compute-Shader ist ein Shader ohne Rasterizer und ohne " +
+                                "Framebuffer. Übrig bleibt der Kern: eine Funktion für " +
+                                "hunderttausende unabhängige Datenpunkte.",
+                        )
+                    }
+                    Step(step >= 2) {
+                        ComputePoint(
+                            "Die Geschichte",
+                            MaterialTheme.deck.teal,
+                            "Vor CUDA haben Forscher ihre Daten als Textur verpackt, durch " +
+                                "einen Fragment-Shader geschickt und das Bild wieder " +
+                                "ausgelesen. GPGPU.",
+                        )
+                    }
+                    Step(step >= 3) {
+                        ComputePoint(
+                            "Warum neuronale Netze",
+                            MaterialTheme.deck.teal,
+                            "Ein Layer ist im Kern eine Matrixmultiplikation: identische " +
+                                "Operation, millionenfach unabhängig, keine Verzweigung auf " +
+                                "Datenbasis. Dieselbe Form wie mein Bildfilter.",
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                ) {
+                    Step(step >= 4) {
+                        ComputePoint(
+                            "Rückbezug 1 · Bandbreite",
+                            MaterialTheme.deck.amber,
+                            "Bei LLM-Inferenz ist der Engpass nicht die Rechenleistung, " +
+                                "sondern die Speicherbandbreite. Mein Filter ist auch nicht " +
+                                "rechenlimitiert, sondern limitiert durch Lesen und Schreiben " +
+                                "des Bildes.",
+                        )
+                    }
+                    Step(step >= 5) {
+                        ComputePoint(
+                            "Rückbezug 2 · Präzision",
+                            MaterialTheme.deck.amber,
+                            "Die Frage aus step8() — wie viele Bits brauche ich wirklich? — " +
+                                "heißt in der KI-Welt Quantisierung: fp32, fp16, int8, int4.",
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun Point(
-    visible: Boolean,
-    title: String,
-    text: String,
-    accent: Color = Palette.Muted,
-) {
-    Reveal(visible) {
-        Column(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-            Text(title, color = accent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(2.dp))
-            Body(text, size = 13)
-        }
+private fun ComputePoint(label: String, labelColor: Color, text: String) {
+    Column(Modifier.fillMaxWidth()) {
+        SectionLabel(label, labelColor)
+        Spacer(Modifier.height(9.dp))
+        Body(text, color = MaterialTheme.colorScheme.onBackground)
     }
 }

@@ -1,113 +1,145 @@
 package de.myposter.academy.shaders.slides
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.myposter.academy.shaders.theme.Body
-import de.myposter.academy.shaders.theme.Muted
-import de.myposter.academy.shaders.theme.TitledSlide
+import de.myposter.academy.shaders.theme.Fill
+import de.myposter.academy.shaders.theme.HeroFrame
+import de.myposter.academy.shaders.theme.SlideFrame
 import net.kodein.cup.Slide
 import net.kodein.cup.Slides
 import net.kodein.cup.imgexp.Export
 import net.kodein.cup.speaker.SpeakerNotes
 import net.kodein.cup.utils.slideContextOf
-import net.kodein.cup.widgets.material3.BulletPoints
 
-/** A backup slide: a title, a list of facts, no steps. */
-private fun backup(name: String, title: String, notes: String, vararg facts: String): Slide =
+/** A backup slide: a title, a few facts, no steps. */
+private fun backup(name: String, id: String, title: String, notes: String, vararg facts: String): Slide =
     Slide(
         name = name,
         // Backup slides stay out of the PDF export.
         context = slideContextOf(Export.none(), SpeakerNotes(notes)),
     ) {
-        TitledSlide(title) {
-            Muted("Backup — nur für Q&A", size = 12)
-            Spacer(Modifier.height(14.dp))
-            BulletPoints(spacedBy = 10.dp) {
-                facts.forEach { fact -> item { Body(fact, size = 15) } }
+        SlideFrame(id = id, timing = "Backup", title = title) {
+            Fill(spacedBy = 13.dp) {
+                facts.forEach { Body(it) }
             }
         }
     }
 
+/** The divider the speaker lands on when the Q&A starts. */
+val backupIntro: Slide = Slide(
+    name = "backupIntro",
+    context = slideContextOf(Export.none(), SpeakerNotes("Ab hier nur auf Nachfrage.")),
+) {
+    HeroFrame(id = "Backup", timing = "Nur auf Nachfrage") {
+        Text(
+            text = "Backup",
+            style = MaterialTheme.typography.displayLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(18.dp))
+        Text(
+            text = "Messmethodik · Divergenz · Präzision · Compute · " +
+                "Mobile-GPUs · Tensor Cores · NPUs",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
+    }
+}
+
 val backupMessmethodik: Slide = backup(
     name = "backupMessmethodik",
+    id = "B1 · backupMessmethodik",
     title = "Messmethodik",
-    notes = "Nenne Gerät, Bildgröße und Anzahl Läufe. Sag auch, was nicht gemessen wurde.",
-    "Gerät: der Präsentationsrechner, nicht ein Benchmark-Server.",
-    "Bildgröße: fest, 4000 × 3000 (12 MP), im Repo reproduzierbar erzeugt.",
-    "Warmup: die ersten Läufe zählen nicht. Ein kalter Shader-Compile kostet Hunderte Millisekunden.",
-    "Median über die letzten 31 Läufe, nicht Mittelwert. Ein GC-Ausreißer soll die Zahl nicht bestimmen.",
-    "CPU-Zahl: eine volle Filterrunde über das Pixel-Array.",
-    "GPU-Zahl: gemessene Zeit pro Frame, Filter inklusive.",
-    "Nicht gemessen: Upload des Bildes zur GPU, Readback, Dekodierung der JPEG-Datei.",
+    notes = "Zahlen nur nennen, wenn danach gefragt wird.",
+    "Gerät und Bildgröße: fest, im Repo dokumentiert",
+    "Warmup vor der Messung, 30 Läufe, Median statt Mittelwert",
+    "Gemessen wird die Zeit pro Frame im Slider-Drag",
+    "Nicht gemessen: Laden und Dekodieren des Bildes, Shader-Compile beim ersten Frame",
 )
 
 val backupDivergenz: Slide = backup(
     name = "backupDivergenz",
-    title = "Warum das eine `if` unkritisch ist",
-    notes = "Divergenz kostet nur innerhalb einer Gruppe.",
-    "Der Shader hat genau ein `if`: `src.a <= 0.0`.",
-    "Divergenz kostet nur, wenn sie innerhalb einer Thread-Gruppe auftritt.",
-    "Für ein ganzes Foto fällt dieser Test fast immer einheitlich aus.",
-    "Gruppen an der Kante eines transparenten Bereichs divergieren — das sind wenige.",
+    id = "B2 · backupDivergenz",
+    title = "Das eine if im Shader",
+    notes = "Kommt fast immer als Frage, weil auf Slide 6 „kein einziges if“ steht.",
+    "if (a <= 0.0) return half4(0.0);",
+    "Divergenz kostet nur, wenn sie innerhalb einer Gruppe auftritt. " +
+        "Diese Bedingung fällt für ein ganzes Bild fast immer einheitlich aus.",
+    "Teuer wären Verzweigungen, die vom Pixelwert abhängen — genau die, " +
+        "die die Filterschritte ersetzt hätten.",
 )
 
 val backupPraezision: Slide = backup(
     name = "backupPraezision",
-    title = "half vs. float",
-    notes = "Warum float3 für die 0..255-Domäne.",
-    "`half` hat 10 Bit Mantisse. Werte über 1024 lassen sich nicht mehr exakt darstellen.",
-    "Die Filterformeln rechnen in 0..255, mit Zwischenergebnissen darüber.",
-    "Rundung in `half` weicht dann sichtbar von der CPU-Variante ab.",
-    "Deshalb `float3` im Rechenpfad und `half4` nur an der Schnittstelle zu Skia.",
-    "Zwischen Geräten verhält sich `half` nicht identisch. `float` ist die sichere Wahl.",
+    id = "B3 · backupPraezision",
+    title = "half oder float",
+    notes = "Nur wenn jemand nach half vs. float fragt.",
+    "half ist auf Mobile-GPUs schneller, hat aber in der 0..255-Domäne zu wenige " +
+        "Stufen für ein pixelgleiches Ergebnis.",
+    "Deshalb float3 in der Rechnung und half4 nur am Ein- und Ausgang.",
+    "Präzision ist nicht garantiert gleich zwischen Geräten — der Grund für die " +
+        "Pixelvergleichs-Tests.",
 )
 
 val backupCompute: Slide = backup(
     name = "backupCompute",
+    id = "B4 · backupCompute",
     title = "Compute-Shader im Detail",
-    notes = "Nur wenn jemand nachhakt.",
-    "Workgroup: eine Gruppe von Threads, die sich Shared Memory teilt.",
-    "Shared Memory ist schneller als der globale Speicher, aber klein.",
-    "Blur profitiert davon: jedes Pixel liest die Nachbarn, die Gruppe lädt den Ausschnitt einmal.",
-    "Ein Fragment-Shader kann das nicht — er sieht nur sein eigenes Pixel.",
-    "APIs: CUDA, Vulkan Compute, Metal Compute, WebGPU.",
+    notes = "Wenn jemand nach Blur oder Shared Memory fragt.",
+    "Workgroups statt Pixelraster: du bestimmst selbst, welche Threads zusammengehören.",
+    "Shared Memory erlaubt Datenaustausch innerhalb einer Workgroup — " +
+        "das kann ein Fragment-Shader nicht.",
+    "Deshalb profitiert ein Blur davon: jedes Pixel braucht seine Nachbarn, " +
+        "und die lassen sich einmal gemeinsam laden statt neunmal einzeln.",
 )
 
 val backupTbdr: Slide = backup(
     name = "backupTbdr",
-    title = "Mobile-GPUs sind anders",
-    notes = "Tiling und Bandbreite.",
-    "Mobile-GPUs arbeiten Tile-based Deferred Rendering: sie zerlegen das Bild in Kacheln.",
-    "Eine Kachel passt in schnellen On-Chip-Speicher. Das spart Bandbreite, und Bandbreite kostet Strom.",
-    "Desktop-GPUs haben breite Speicheranbindung und rendern direkt.",
-    "Folge: Was auf dem Desktop billig ist, kann auf dem Handy an der Bandbreite hängen.",
+    id = "B5 · backupTbdr",
+    title = "Warum Mobile-GPUs anders sind",
+    notes = "Nur bei Fragen zu Android-Performance.",
+    "Tile-based Rendering: das Bild wird in Kacheln zerlegt, die im schnellen " +
+        "On-Chip-Speicher bearbeitet werden.",
+    "Der Engpass ist die Bandbreite zum Hauptspeicher, nicht die Arithmetik — " +
+        "Energiebudget statt Kühlkörper.",
+    "Praktische Folge: ein Filter, der das Bild einmal liest und einmal schreibt, " +
+        "ist auf Mobile fast gratis. Mehrfache Durchläufe sind es nicht.",
 )
 
 val backupTensorCores: Slide = backup(
     name = "backupTensorCores",
+    id = "B6 · backupTensorCores",
     title = "Tensor Cores",
-    notes = "Kurz halten, das ist ein eigener Vortrag.",
-    "Tensor Cores sind Matrix-Einheiten: sie rechnen kleine Matrixmultiplikationen in einem Schritt.",
-    "Sie sind kein Nebenprodukt der Grafik-Pipeline, sondern für Inferenz und Training gebaut.",
-    "Eine H100 ist deshalb keine „große Grafikkarte“ mehr — die Grafik-Pipeline ist dort Beiwerk.",
-    "Der Kern bleibt: dieselbe Operation, sehr viele unabhängige Daten.",
+    notes = "Nicht von selbst aufschlagen — das ist ein eigener Vortrag.",
+    "Eigene Einheiten, die kleine Matrixmultiplikationen in einem Schritt rechnen, " +
+        "statt sie aus einzelnen Multiplikationen zusammenzusetzen.",
+    "Sie arbeiten in reduzierter Präzision — derselbe Handel wie bei der Quantisierung.",
+    "Deshalb ist ein aktueller Rechenzentrums-Chip keine große Grafikkarte mehr: " +
+        "die Grafik-Pipeline ist darauf nur noch ein Teil.",
 )
 
 val backupNpu: Slide = backup(
     name = "backupNpu",
-    title = "NPUs auf Handys",
-    notes = "Wann nicht die GPU.",
-    "Eine NPU ist auf Integer-Matrixmathematik und niedrige Leistungsaufnahme optimiert.",
-    "Für quantisierte Modelle ist sie effizienter als die GPU.",
-    "Für Bildfilter, deren Ergebnis direkt gezeichnet wird, ist sie falsch: das Ergebnis müsste zurück.",
-    "Faustregel: Ergebnis auf den Bildschirm → GPU. Ergebnis in einen Buffer → NPU prüfen.",
+    id = "B7 · backupNpu",
+    title = "NPUs auf dem Handy",
+    notes = "Letzte Backup-Folie.",
+    "Richtig für feste Modelloperationen bei niedrigem Energieverbrauch — " +
+        "Segmentierung, Erkennung, Upscaling.",
+    "Falsch für unseren Bildfilter: das Ergebnis soll direkt gezeichnet werden, " +
+        "und genau dafür ist die GPU der kürzere Weg.",
+    "Die Auswahlregel bleibt dieselbe wie auf Folie 16: Wo liegen die Daten, " +
+        "und wo soll das Ergebnis hin?",
 )
 
 /** All backup slides, in the order the Q&A is likely to need them. */
 val backupSlides: Slides = Slides(
+    backupIntro,
     backupMessmethodik,
     backupDivergenz,
     backupPraezision,

@@ -2,135 +2,177 @@ package de.myposter.academy.shaders.slides
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import de.myposter.academy.shaders.theme.AccentRule
 import de.myposter.academy.shaders.theme.Body
-import de.myposter.academy.shaders.theme.CenteredBlock
-import de.myposter.academy.shaders.theme.Muted
-import de.myposter.academy.shaders.theme.Palette
-import de.myposter.academy.shaders.theme.Reveal
-import de.myposter.academy.shaders.theme.Statement
-import de.myposter.academy.shaders.theme.TitledSlide
+import de.myposter.academy.shaders.theme.Card
+import de.myposter.academy.shaders.theme.Caption
+import de.myposter.academy.shaders.theme.Fill
+import de.myposter.academy.shaders.theme.HeroFrame
+import de.myposter.academy.shaders.theme.HeroTitle
+import de.myposter.academy.shaders.theme.SectionLabel
+import de.myposter.academy.shaders.theme.SlideFrame
+import de.myposter.academy.shaders.theme.Step
+import de.myposter.academy.shaders.theme.deck
+import de.myposter.academy.shaders.theme.monoFamily
 import net.kodein.cup.Slide
 import net.kodein.cup.speaker.SpeakerNotes
-import net.kodein.cup.widgets.material3.BulletPoints
 
 // Slide 15 — 17:45–18:45
 val preis by Slide(
-    stepCount = 4,
+    stepCount = 5,
     context = SpeakerNotes(
         """
-        Ehrliche Kostenseite. Macht den Vortrag glaubwürdiger als eine reine
-        Erfolgsstory.
-
-        Step 1 löst den Spannungsbogen von Slide 3 auf: Der Readback ist der
-        Grund, warum unser Byte-Loop weiterlebt.
+        Ehrliche Kostenseite — macht den Vortrag glaubwürdiger als eine reine
+        Erfolgsstory. Step 1 löst den Spannungsbogen von Slide 3 auf.
         """
     )
 ) { step ->
-    TitledSlide("Der Preis") {
-        BulletPoints(spacedBy = 12.dp) {
-            item(visible = step >= 1) {
-                Column {
-                    Label("Transfer")
-                    Body(
-                        "Lohnt sich nur, wenn das Bild ohnehin auf der GPU liegt und dort bleibt. " +
-                            "Muss das Ergebnis zurück in den RAM, frisst der Readback den Gewinn.",
-                        size = 14,
+    SlideFrame(id = "15 · preis", timing = "17:45–18:45 · 4 Steps", title = "Der Preis") {
+        Fill(spacedBy = 22.dp) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+                Step(step >= 1, Modifier.weight(1f)) {
+                    CostCard(
+                        label = "Transfer",
+                        labelColor = MaterialTheme.deck.cpu,
+                        text = "Lohnt sich nur, wenn das Bild ohnehin auf der GPU liegt und " +
+                            "dort bleibt. Muss das Ergebnis zurück in den RAM, frisst der " +
+                            "Readback den Gewinn.",
+                        conclusion = "Deshalb lebt unser Byte-Loop weiter.",
+                    )
+                }
+                Step(step >= 2, Modifier.weight(1f)) {
+                    CostCard(
+                        label = "Zwei Implementierungen, eine Wahrheit",
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Eine billigere Umformulierung eines Schritts ändert, was der " +
+                            "Kunde gedruckt bekommt. Absicherung: Pixelvergleichs-Tests " +
+                            "zwischen beiden Pfaden.",
                     )
                 }
             }
-            item(visible = step >= 2) {
-                Column {
-                    Label("Zwei Implementierungen, eine Wahrheit")
-                    Body(
-                        "Eine billigere Umformulierung eines Schritts ändert, was der Kunde gedruckt bekommt. " +
-                            "Absicherung: Pixelvergleichs-Tests zwischen beiden Pfaden.",
-                        size = 14,
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+                Step(step >= 3, Modifier.weight(1f)) {
+                    CostCard(
+                        label = "Debugging",
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Kein Breakpoint, kein Log. Man debuggt, indem man " +
+                            "Zwischenergebnisse als Farbe ausgibt.",
+                    )
+                }
+                Step(step >= 4, Modifier.weight(1f)) {
+                    CostCard(
+                        label = "Fragmentierung",
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "AGSL braucht Android 13+, Präzision verhält sich zwischen " +
+                            "Geräten nicht identisch, und der erste Frame kostet Compile-Zeit.",
                     )
                 }
             }
-            item(visible = step >= 3) {
-                Column {
-                    Label("Debugging")
-                    Body("Kein Breakpoint, kein Log. Man debuggt, indem man Zwischenergebnisse als Farbe ausgibt.", size = 14)
-                }
-            }
-            item(visible = step >= 4) {
-                Column {
-                    Label("Fragmentierung")
-                    Body(
-                        "AGSL braucht Android 13+. Präzision (half vs. float) verhält sich zwischen Geräten " +
-                            "nicht identisch. Compile-Zeit beim ersten Frame.",
-                        size = 14,
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Reveal(step >= 1) {
-            Statement("Das ist der Grund, warum unser Byte-Loop weiterlebt.", accent = Palette.Warn, size = 17)
         }
     }
 }
 
-@androidx.compose.runtime.Composable
-private fun Label(text: String) {
-    Text(text, color = Palette.Accent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+@Composable
+private fun CostCard(label: String, labelColor: Color, text: String, conclusion: String? = null) {
+    Card(Modifier.fillMaxWidth()) {
+        SectionLabel(label, labelColor)
+        Spacer(Modifier.height(10.dp))
+        Body(text, color = MaterialTheme.colorScheme.onBackground)
+        if (conclusion != null) {
+            Spacer(Modifier.height(9.dp))
+            Text(
+                text = conclusion,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+    }
 }
 
 // Slide 16 — 18:45–19:15
 val wannLohntEs by Slide(
-    stepCount = 3,
-    context = SpeakerNotes("Die Checkliste zum Mitnehmen. Alle drei müssen zutreffen.")
+    stepCount = 4,
+    context = SpeakerNotes("Die Checkliste zum Mitnehmen — alle drei müssen zutreffen.")
 ) { step ->
-    TitledSlide("Wann es sich lohnt") {
-        Muted("Alle drei müssen zutreffen.")
-        Spacer(Modifier.height(20.dp))
-        BulletPoints(spacedBy = 18.dp) {
-            item(visible = step >= 1) {
-                Body("Dieselbe simple Rechnung auf sehr vielen unabhängigen Daten", size = 19)
+    SlideFrame(
+        id = "16 · wannLohntEs",
+        timing = "18:45–19:15 · 3 Steps",
+        title = "Wann sich die GPU lohnt",
+    ) {
+        SectionLabel("Alle drei müssen zutreffen", MaterialTheme.colorScheme.outline)
+        Fill(spacedBy = 28.dp) {
+            Step(step >= 1) {
+                Criterion(
+                    "01",
+                    "Dieselbe simple Rechnung auf sehr vielen unabhängigen Daten",
+                )
             }
-            item(visible = step >= 2) {
-                Body("Das Ergebnis soll sowieso auf den Bildschirm", size = 19)
+            Step(step >= 2) {
+                Criterion("02", "Das Ergebnis soll sowieso auf den Bildschirm")
             }
-            item(visible = step >= 3) {
-                Body("Es passiert interaktiv oder oft, nicht einmal im Batch", size = 19)
+            Step(step >= 3) {
+                Criterion("03", "Es passiert interaktiv oder oft, nicht einmal im Batch")
             }
         }
+    }
+}
+
+@Composable
+private fun Criterion(number: String, text: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = number,
+            modifier = Modifier.width(80.dp),
+            style = MaterialTheme.typography.displayMedium.copy(fontFamily = monoFamily),
+            color = MaterialTheme.deck.gpu,
+        )
+        Spacer(Modifier.width(24.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 
 // Slide 17 — 19:15–19:35
 val takeaway by Slide(
     stepCount = 2,
-    context = SpeakerNotes("Langsam vorlesen. Das ist der Satz, der bleiben soll.")
+    context = SpeakerNotes("Langsam sprechen. Der zweite Step ist die Brücke zurück zu Compute.")
 ) { step ->
-    CenteredBlock {
+    HeroFrame(id = "17 · takeaway", timing = "19:15–19:35 · 2 Steps") {
         Text(
-            text = "Wenn dieselbe simple Rechnung millionenfach auf unabhängigen Daten läuft " +
-                "und das Ergebnis sowieso auf den Bildschirm soll, ist die GPU nicht der exotische, " +
-                "sondern der naheliegende Ort.",
-            color = Palette.OnBackground,
-            fontSize = 22.sp,
-            lineHeight = 31.sp,
-            fontWeight = FontWeight.Medium,
+            text = "Wenn dieselbe simple Rechnung millionenfach auf unabhängigen Daten " +
+                "läuft und das Ergebnis sowieso auf den Bildschirm soll, ist die GPU " +
+                "nicht der exotische, sondern der naheliegende Ort.",
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onBackground,
         )
-        Spacer(Modifier.height(18.dp))
-        Muted("Und der Einstieg kostet heute eine Funktion, nicht eine Grafik-Pipeline.", size = 16)
-        Spacer(Modifier.height(28.dp))
-        Reveal(step >= 1) {
-            Statement(
-                "Und wenn das Ergebnis gar nicht auf den Bildschirm soll, heißt das Werkzeug " +
-                    "Compute statt Fragment — das Denkmuster bleibt dasselbe.",
-                accent = Palette.Gpu,
-                size = 17,
+        Spacer(Modifier.height(26.dp))
+        Text(
+            text = "Und der Einstieg kostet heute eine Funktion, nicht eine Grafik-Pipeline.",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
+        Spacer(Modifier.height(26.dp))
+        Step(step >= 1) {
+            Text(
+                text = "Und wenn das Ergebnis gar nicht auf den Bildschirm soll, heißt das " +
+                    "Werkzeug Compute statt Fragment — das Denkmuster bleibt dasselbe.",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.deck.teal,
             )
         }
     }
@@ -138,18 +180,31 @@ val takeaway by Slide(
 
 // Slide 18
 val fragen by Slide(
-    context = SpeakerNotes(
-        """
-        Backup-Slides liegen hinter dieser Folie:
-        Messmethodik, Divergenz, Präzision, Compute, TBDR, Tensor Cores, NPU.
-        """
-    )
+    context = SpeakerNotes("Repo-Link einblenden lassen und stehen lassen.")
 ) {
-    CenteredBlock {
-        Text("Fragen?", color = Palette.OnBackground, fontSize = 40.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(30.dp))
-        Muted("Shader, Slides und Playground: (Repo-Link)", size = 15)
-        Spacer(Modifier.height(8.dp))
-        Muted("Diese Präsentation ist eine Compose-App — CuP, github.com/KodeinKoders/CuP", size = 15)
+    HeroFrame(id = "18 · fragen", timing = "1 Step") {
+        HeroTitle("Fragen?")
+        Spacer(Modifier.height(22.dp))
+        AccentRule()
+        Spacer(Modifier.height(22.dp))
+        LinkLine("Shader, Slides und Playground: ", "github.com/…")
+        Spacer(Modifier.height(10.dp))
+        LinkLine(
+            "Diese Präsentation ist eine Compose-App — CuP, ",
+            "github.com/KodeinKoders/CuP",
+        )
+    }
+}
+
+@Composable
+private fun LinkLine(text: String, link: String) {
+    Row(verticalAlignment = Alignment.Bottom) {
+        Body(text, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = link,
+            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = monoFamily,
+            color = MaterialTheme.colorScheme.outline,
+        )
     }
 }

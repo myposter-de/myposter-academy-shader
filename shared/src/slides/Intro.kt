@@ -1,16 +1,19 @@
 package de.myposter.academy.shaders.slides
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,48 +23,48 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.myposter.academy.shaders.shader.CpuAdjustedImage
 import de.myposter.academy.shaders.shader.ImageAdjust
 import de.myposter.academy.shaders.shader.MeasureFrameTime
 import de.myposter.academy.shaders.shader.ShaderAdjustedImage
+import de.myposter.academy.shaders.shader.formatMs
 import de.myposter.academy.shaders.shader.loadDemoImage
+import de.myposter.academy.shaders.theme.AccentRule
 import de.myposter.academy.shaders.theme.Body
-import de.myposter.academy.shaders.theme.CenteredBlock
-import de.myposter.academy.shaders.theme.Muted
-import de.myposter.academy.shaders.theme.Palette
-import de.myposter.academy.shaders.theme.Reveal
-import de.myposter.academy.shaders.theme.Statement
-import de.myposter.academy.shaders.theme.TitledSlide
+import de.myposter.academy.shaders.theme.Caption
+import de.myposter.academy.shaders.theme.CenterText
+import de.myposter.academy.shaders.theme.Fill
+import de.myposter.academy.shaders.theme.HeroFrame
+import de.myposter.academy.shaders.theme.HeroTitle
+import de.myposter.academy.shaders.theme.SectionLabel
+import de.myposter.academy.shaders.theme.SlideFrame
+import de.myposter.academy.shaders.theme.Step
+import de.myposter.academy.shaders.theme.deck
+import de.myposter.academy.shaders.theme.monoFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kodein.cup.PreparedSlide
 import net.kodein.cup.Slide
 import net.kodein.cup.speaker.SpeakerNotes
-import net.kodein.cup.widgets.material3.BulletPoints
 
 // Slide 1 — 0:00–0:20
 val titel by Slide(
-    context = SpeakerNotes(
-        """
-        Kurz halten. Nicht vorstellen, was kommt — direkt in die Demo.
-        """
-    )
+    context = SpeakerNotes("Kurz halten. Nicht ankündigen, was kommt — direkt in die Demo.")
 ) {
-    CenteredBlock {
+    HeroFrame(id = "01 · titel", timing = "0:00–0:20 · 1 Step") {
+        AccentRule()
+        Spacer(Modifier.height(22.dp))
+        HeroTitle("Warum dein Bildfilter auf der falschen Hardware läuft")
+        Spacer(Modifier.height(22.dp))
         Text(
-            "Warum dein Bildfilter auf der falschen Hardware läuft",
-            color = Palette.OnBackground,
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 44.sp,
+            text = "GPU-Shader, anhand eines echten Umbaus",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
         )
-        Spacer(Modifier.height(16.dp))
-        Body("GPU-Shader, anhand eines echten Umbaus", size = 19)
-        Spacer(Modifier.height(28.dp))
-        Muted("Jannis · MYPOSTER Academy")
+        Spacer(Modifier.height(8.dp))
+        Body("Jannis · MYPOSTER Academy", color = MaterialTheme.colorScheme.outline)
     }
 }
 
@@ -76,8 +79,6 @@ val hookDemo by PreparedSlide(
         Ehrlich bleiben:
         - Median über N Läufe, nach Warmup
         - feste Bildgröße nennen
-        - CPU-Zahl = eine volle Filterrunde über das Pixel-Array
-        - GPU-Zahl = gemessene Zeit pro Frame, Filter inklusive
 
         Steps:
         0. CPU-Implementierung — ziehen, es ruckelt
@@ -100,55 +101,102 @@ val hookDemo by PreparedSlide(
 
         MeasureFrameTime(active = step >= 1) { TalkState.timings.addFrame(it) }
 
-        Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        SlideFrame(
+            id = "02 · hookDemo · LIVE",
+            timing = "0:20–3:00 · 3 Steps",
+            title = "Derselbe Slider, zwei Implementierungen",
         ) {
-            Box(
+            Row(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center,
+                horizontalArrangement = Arrangement.spacedBy(28.dp),
             ) {
-                when {
-                    demo == null -> Muted("Testbild lädt …")
-                    step == 0 -> CpuAdjustedImage(
-                        demo = demo,
-                        adjust = adjust,
+                DemoColumn(
+                    label = "CPU · Byte-Loop",
+                    accent = MaterialTheme.deck.cpu,
+                    verdict = "Es ruckelt und hinkt hinterher.",
+                    brightness = brightness,
+                    onBrightness = { brightness = it },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    when (demo) {
+                        null -> CenterText("Testbild lädt …", MaterialTheme.colorScheme.outline)
+                        else -> CpuAdjustedImage(
+                            demo = demo,
+                            adjust = adjust,
+                            modifier = Modifier.fillMaxSize(),
+                            onTiming = TalkState.timings::addCpu,
+                        )
+                    }
+                }
+
+                Step(step >= 1, Modifier.weight(1f)) {
+                    DemoColumn(
+                        label = "GPU · Shader",
+                        accent = MaterialTheme.deck.gpu,
+                        verdict = "Es klebt am Finger.",
+                        brightness = brightness,
+                        onBrightness = { brightness = it },
                         modifier = Modifier.fillMaxSize(),
-                        onTiming = TalkState.timings::addCpu,
-                    )
-                    else -> {
-                        val bitmap = remember(demo) { demo.toImageBitmap() }
-                        ShaderAdjustedImage(bitmap, adjust, Modifier.fillMaxSize())
+                    ) {
+                        when (demo) {
+                            null -> CenterText("Testbild lädt …", MaterialTheme.colorScheme.outline)
+                            else -> {
+                                val bitmap = remember(demo) { demo.toImageBitmap() }
+                                ShaderAdjustedImage(bitmap, adjust, Modifier.fillMaxSize())
+                            }
+                        }
                     }
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = if (step == 0) "CPU" else "GPU",
-                    color = if (step == 0) Palette.Cpu else Palette.Gpu,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(44.dp),
-                )
-                Slider(
-                    value = brightness.toFloat(),
-                    onValueChange = { brightness = it.toInt() },
-                    valueRange = -100f..100f,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = "$brightness",
-                    color = Palette.Muted,
-                    fontSize = 15.sp,
-                    modifier = Modifier.width(44.dp),
-                )
-            }
-
-            Reveal(step >= 2) { TimingBadge(Modifier.padding(top = 10.dp)) }
+            Spacer(Modifier.height(16.dp))
+            Step(step >= 2) { TimingBadge() }
         }
+    }
+}
+
+/** One half of the hook demo: a label, the image, a slider and a verdict. */
+@Composable
+private fun DemoColumn(
+    label: String,
+    accent: Color,
+    verdict: String,
+    brightness: Int,
+    onBrightness: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    image: @Composable () -> Unit,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionLabel(label, accent)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .background(MaterialTheme.deck.panel),
+        ) {
+            image()
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Slider(
+                value = brightness.toFloat(),
+                onValueChange = { onBrightness(it.toInt()) },
+                valueRange = -100f..100f,
+                colors = SliderDefaults.colors(
+                    thumbColor = accent,
+                    activeTrackColor = accent,
+                    inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = "Helligkeit",
+                style = MaterialTheme.typography.bodyMedium,
+                fontFamily = monoFamily,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Caption(verdict, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -157,40 +205,37 @@ val hookZahlen by Slide(
     stepCount = 2,
     context = SpeakerNotes(
         """
-        Hier kommt die Wendung, die den Vortrag interessant macht.
+        Hier kommt die Wendung: Der Shader hat die CPU-Implementierung nicht
+        ersetzt. Alle Pfade, die das Ergebnis als Bitmap zurücklesen, nutzen
+        weiter den Byte-Loop.
 
-        Der Shader hat die CPU-Implementierung **nicht ersetzt**.
-        Alle Pfade, die das Ergebnis als Bitmap zurücklesen statt es zu zeichnen —
-        PhotoImageBitmap, der Photobook-Renderer, die nativen Renderer —
-        nutzen weiter den Byte-Loop.
-
-        Wir haben jetzt zwei Implementierungen, die pixelgenau übereinstimmen müssen.
-        Warum das so ist, kommt am Ende. Spannungsbogen aufmachen und stehenlassen.
+        Zwei Implementierungen, die pixelgenau übereinstimmen müssen.
+        Warum, kommt am Ende — Spannungsbogen stehenlassen.
         """
     )
 ) { step ->
-    TitledSlide("Die Messung") {
+    SlideFrame(id = "03 · hookZahlen", timing = "3:00–3:40 · 2 Steps", title = "Die Messung") {
         val cpu = TalkState.timings.cpuMedianMs
         val gpu = TalkState.timings.frameMedianMs
         val max = listOfNotNull(cpu, gpu).maxOrNull() ?: 1.0
 
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-            TimingBar("CPU", cpu, max, Palette.Cpu)
-            TimingBar("GPU", gpu, max, Palette.Gpu)
-        }
-
-        Spacer(Modifier.height(10.dp))
-        Muted(
+        Caption(
             TalkState.demo?.let {
-                "${it.width}×${it.height} (${"%.0f".format(it.megaPixels)} MP) · " +
-                    "Median über ${TalkState.timings.cpuRuns} Läufe, nach Warmup"
-            } ?: "Bildgröße: noch nicht gemessen"
+                "${it.width} × ${it.height} px · Median aus ${TalkState.timings.cpuRuns} Läufen nach Warmup"
+            } ?: "Noch nicht gemessen — Slide 2 zuerst zeigen"
         )
 
-        Spacer(Modifier.weight(1f))
+        Fill(spacedBy = 24.dp) {
+            TimingBar("CPU · Byte-Loop", cpu, max, MaterialTheme.deck.cpu)
+            TimingBar("GPU · Shader", gpu, max, MaterialTheme.deck.gpu)
+        }
 
-        Reveal(step >= 1) {
-            Statement("Und der Byte-Loop lebt weiter.", accent = Palette.Warn)
+        Step(step >= 1) {
+            Text(
+                text = "Und der Byte-Loop lebt weiter.",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
         }
     }
 }
@@ -199,14 +244,47 @@ val hookZahlen by Slide(
 val agenda by Slide(
     context = SpeakerNotes("Zehn Sekunden. Nicht vorlesen.")
 ) {
-    TitledSlide("Agenda") {
-        BulletPoints {
-            item { Body("Warum die GPU das kann") }
-            item { Body("Was ein Shader eigentlich ist") }
-            item { Body("Der echte Shader, Zeile für Zeile") }
-            item { Body("Wie man selbst hinkommt") }
-            item { Body("Dasselbe Prinzip, ganz anderes Feld") }
-            item { Body("Wann es sich lohnt — und wann nicht") }
+    SlideFrame(id = "04 · agenda", timing = "3:40–4:00 · 1 Step", title = "Agenda") {
+        val items = listOf(
+            "01" to "Warum die GPU das kann",
+            "02" to "Was ein Shader eigentlich ist",
+            "03" to "Der echte Shader, Zeile für Zeile",
+            "04" to "Wie man selbst hinkommt",
+            "05" to "Dasselbe Prinzip, ganz anderes Feld",
+            "06" to "Wann es sich lohnt — und wann nicht",
+        )
+        Fill(spacedBy = 18.dp) {
+            Row(
+                Modifier.fillMaxWidth().fillMaxHeight(),
+                horizontalArrangement = Arrangement.spacedBy(45.dp),
+            ) {
+                listOf(items.take(3), items.drop(3)).forEach { column ->
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
+                    ) {
+                        column.forEach { (number, label) -> AgendaItem(number, label) }
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun AgendaItem(number: String, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = number,
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = monoFamily,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.width(14.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
